@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# use http://www.phpdoc.org
+phpdoc --validate -d ../lib -t ../docs
