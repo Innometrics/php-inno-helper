@@ -358,44 +358,6 @@ class Helper
     }
 
     /**
-     * Update attributes of the profile
-     * @param object|array $attributes Key=>value pairs with attributes
-     * @param object|array $params Custom environment vars for update attributes
-     * @return bool|string String with response or false if request failed
-     */
-    public function setAttributes($attributes, $params = null) {
-        $attributes = (object)$attributes;
-        $params = (object)$params;
-        $vars = self::mergeVars($this->getVars(), $params);
-
-        $url = $this->profileAppUrl(array(
-            'groupId'       => $vars->groupId,
-            'bucketName'    => $vars->bucketName,
-            'appKey'        => $vars->appKey,
-            'profileId'     => $vars->profileId
-        ));
-
-        $requestParams = array(
-            'url'   => $url,
-            'type'  => 'post',
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            ),
-            'body' => json_encode(array(
-                'id' => $vars->profileId,
-                'attributes' => array(array(
-                    'collectApp'    => $vars->collectApp,
-                    'section'       => $vars->section,
-                    'data'          => $attributes
-                ))
-            ))
-        );
-
-        return self::request($requestParams);
-    }
-
-    /**
      * Get attributes of the profile
      *
      * <b>Example:</b>
@@ -442,6 +404,44 @@ class Helper
             $attributes = $body->profile->attributes;
         }
         return $attributes;
+    }
+
+    /**
+     * Update attributes of the profile
+     * @param object|array $attributes Key=>value pairs with attributes
+     * @param object|array $params Custom environment vars for update attributes
+     * @return bool|string String with response or false if request failed
+     */
+    public function setAttributes($attributes, $params = null) {
+        $attributes = (object)$attributes;
+        $params = (object)$params;
+        $vars = self::mergeVars($this->getVars(), $params);
+
+        $url = $this->profileAppUrl(array(
+            'groupId'       => $vars->groupId,
+            'bucketName'    => $vars->bucketName,
+            'appKey'        => $vars->appKey,
+            'profileId'     => $vars->profileId
+        ));
+
+        $requestParams = array(
+            'url'   => $url,
+            'type'  => 'post',
+            'headers' => array(
+                'Content-Type: application/json',
+                'Accept: application/json'
+            ),
+            'body' => json_encode(array(
+                'id' => $vars->profileId,
+                'attributes' => array(array(
+                    'collectApp'    => $vars->collectApp,
+                    'section'       => $vars->section,
+                    'data'          => $attributes
+                ))
+            ))
+        );
+
+        return self::request($requestParams);
     }
 
     /**
