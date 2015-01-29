@@ -395,9 +395,11 @@ class Helper
      * Values in $overrides will overwrite values in $main if they have same keys
      *
      * <b>Example:</b>
+     *      ......
      *      $a = array('a' => 1, 'b' => 2);
      *      $b = (object)array('b' => 10, 'c' => 'asd');
-     *      $helper::mergeVars($a, $b);
+     *      $res = self::mergeVars($a, $b);
+     *      var_dump($res);
      *      ------->
      *      stdClass Object
      *       (
@@ -405,6 +407,7 @@ class Helper
      *           [b] => 10
      *           [c] => 'asd'
      *       )
+     *      ......
      *
      * @param object|array $main
      * @param object|array $overrides
