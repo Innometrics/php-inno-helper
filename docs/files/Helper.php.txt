@@ -44,7 +44,7 @@ class Helper
     /**
      * Form URL to certain profile using App key
      *
-     * * <b>Example:</b>
+     * <b>Example:</b>
      *      $url = $this->profileAppUrl(array(
      *          "profileId"     => "vze0bxh4qpso67t2dxfc7u81a5nxvefc",
      *          "appKey"        => "3R0o0m5a8n7"
@@ -53,9 +53,8 @@ class Helper
      *      ------->
      *      http://api.innomdc.com/v1/companies/42/buckets/testbucket/profiles/vze0bxh4qpso67t2dxfc7u81a5nxvefc?app_key=3R0o0m5a8n7
      *
-     * @param object|array $params Custom parameters to form URL
+     * @param object|array $params Custom parameters to form URL. If some/all parameters omitted, they will be taken from stored env. vars
      * @return string URL to make API request
-     *
      */
     protected function profileAppUrl($params = null) {
         $params = is_null($params) ? $this->getVars() : (object)$params;
@@ -74,7 +73,7 @@ class Helper
      *      ------->
      *      http://api.innomdc.com/v1/companies/42/buckets/testbucket/apps/testapp/custom?app_key=8HJ3hnaxErdJJ62H
      *
-     * @param object|array $params Custom parameters to form URL
+     * @param object|array $params Custom parameters to form URL. If some/all parameters omitted, they will be taken from stored env. vars
      * @return string URL to make API request
      */
     protected function settingsAppUrl($params = null) {
@@ -100,7 +99,7 @@ class Helper
             case 'post':
                 curl_setopt($curl, CURLOPT_POST, 1);
                 if(!empty($params['body'])) {
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params['body']));
+                    curl_setopt($curl, CURLOPT_POSTFIELDS, $params['body']);
                 }
                 break;
             case 'get':
@@ -281,7 +280,22 @@ class Helper
     /**
      * Get application settings
      *
-     * @param object|array $params Custom parameters to get settings
+     * <b>Example:</b>
+     *      try {
+     *          $settings = $helper->getSettings();
+     *          var_dump($settings);
+     *          ------->
+     *          [
+     *              "stringSetting" => "qwe",
+     *              "numberSetting" => 1,
+     *              "arraySetting"  => ["one","two"]
+     *          ]
+     *
+     *      } catch (\ErrorException $e) {
+     *          // application has not settings at all
+     *      }
+     *
+     * @param object|array $params Custom environment vars for retrieve settings
      * @return array
      * @throws \ErrorException If settings are not found exception will be thrown
      */
@@ -305,9 +319,48 @@ class Helper
     }
 
     /**
+     * Update application settings
+     *
+     * <b>Example:</b>
+     *      $helper->setSettings(array(
+     *          "stringSetting" => "foo",
+     *          "numberSetting" => 42,
+     *          "arraySetting"  => ["bar","baz"]
+     *      ));
+     *
+     * @param object|array $settings Settings as key=>value pairs
+     * @param object|array $params Custom environment vars for update operation
+     * @return bool|string
+     */
+    public function setSettings ($settings, $params = null) {
+        $settings = (object)$settings;
+        $params = (object)$params;
+        $vars = self::mergeVars($this->getVars(), $params);
+
+        $url = $this->settingsAppUrl(array(
+            'groupId'       => $vars->groupId,
+            'bucketName'    => $vars->bucketName,
+            'appKey'        => $vars->appKey,
+            'appName'       => $vars->appName
+        ));
+
+        $requestParams = array(
+            'url'   => $url,
+            'type'  => 'post',
+            'headers' => array(
+                'Content-Type: application/json',
+                'Accept: application/json'
+            ),
+            'body' => json_encode($settings)
+        );
+
+        return self::request($requestParams);
+    }
+
+    /**
      * Update attributes of the profile
      * @param object|array $attributes Key=>value pairs with attributes
-     * @param object|array $params Custom parameters to update settings
+     * @param object|array $params Custom environment vars for update attributes
      * @return bool|string String with response or false if request failed
      */
     public function setAttributes($attributes, $params = null) {
@@ -329,15 +382,16 @@ class Helper
                 'Content-Type: application/json',
                 'Accept: application/json'
             ),
-            'body' => array(
+            'body' => json_encode(array(
                 'id' => $vars->profileId,
                 'attributes' => array(array(
                     'collectApp'    => $vars->collectApp,
                     'section'       => $vars->section,
                     'data'          => $attributes
                 ))
-            )
+            ))
         );
+
         return self::request($requestParams);
     }
 
@@ -361,7 +415,7 @@ class Helper
      *          ]
      *      }]
      *
-     * @param object|array $params Custom parameters to update settings
+     * @param object|array $params Custom environment vars for retrieve attributes
      * @return array Profile attributes
      * @throws \ErrorException If profile not found in request response exception will be thrown
      */
@@ -391,7 +445,7 @@ class Helper
     }
 
     /**
-     * Helper method to merge 2 object/assoc array to one object
+     * Helper method to merge 2 objects/assoc arrays to one object
      * Values in $overrides will overwrite values in $main if they have same keys
      *
      * <b>Example:</b>

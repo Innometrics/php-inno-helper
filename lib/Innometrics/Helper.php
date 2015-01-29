@@ -445,7 +445,7 @@ class Helper
     }
 
     /**
-     * Helper method to merge 2 object/assoc array to one object
+     * Helper method to merge 2 objects/assoc arrays to one object
      * Values in $overrides will overwrite values in $main if they have same keys
      *
      * <b>Example:</b>
