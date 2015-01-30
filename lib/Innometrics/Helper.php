@@ -111,14 +111,17 @@ class Helper
      */
     protected static function request($params) {
         $curl = curl_init();
+        $type = strtolower(isset($params['type']) ? $params['type'] : 'get');
         curl_setopt($curl, CURLOPT_POST, 0);
-        switch (strtolower(isset($params['type']) ? : 'get')) {
+        switch ($type) {
             case 'post':
-                curl_setopt($curl, CURLOPT_POST, 1);
+            case 'put':
+                curl_setopt($curl, constant('CURLOPT_'.strtoupper($type)), 1);
                 if(!empty($params['body'])) {
                     curl_setopt($curl, CURLOPT_POSTFIELDS, $params['body']);
                 }
                 break;
+
             case 'get':
             default:
                 if(!empty($params['qs'])) {
@@ -490,7 +493,7 @@ class Helper
         $keys = array_merge(get_object_vars($main), get_object_vars($overrides));
         $vars = array();
         foreach ($keys as $k=>$v) {
-            $vars[$k] = isset($overrides->$k)?:$main->$k;
+            $vars[$k] = isset($overrides->$k) ? $overrides->$k : $main->$k;
         }
         return (object)$vars;
     }
