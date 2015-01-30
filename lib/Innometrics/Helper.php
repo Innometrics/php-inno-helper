@@ -15,8 +15,25 @@ class Helper
      */
     protected $vars;
 
-    public function __construct() {
-        $this->setVars(array());
+    /**
+     * Construct Helper instance
+     *
+     * <b>Example:</b>
+     *      $helper = new Innometrics\Helper(array(
+     *          "bucketName"    => "testbucket",
+     *          "appKey"        => "df8JG35sKf",
+     *          "appName"       => "myphpapp",
+     *          "groupId"       =>  42,
+     *          "apiUrl"        => "http://api.innomdc.com"
+     *      ));
+     *
+     * @param null $vars Initial environment variables
+     */
+    public function __construct($vars = null) {
+        if (is_null($vars)) {
+            $vars = array();
+        }
+        $this->setVars($vars);
     }
 
     /**
