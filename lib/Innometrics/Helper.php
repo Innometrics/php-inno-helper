@@ -27,7 +27,7 @@ class Helper
      *          "apiUrl"        => "http://api.innomdc.com"
      *      ));
      *
-     * @param null $vars Initial environment variables
+     * @param object|array $vars Initial environment variables
      */
     public function __construct($vars = null) {
         if (is_null($vars)) {
