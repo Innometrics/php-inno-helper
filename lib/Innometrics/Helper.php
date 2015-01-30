@@ -112,11 +112,10 @@ class Helper
     protected static function request($params) {
         $curl = curl_init();
         $type = strtolower(isset($params['type']) ? $params['type'] : 'get');
-        curl_setopt($curl, CURLOPT_POST, 0);
         switch ($type) {
             case 'post':
             case 'put':
-                curl_setopt($curl, constant('CURLOPT_'.strtoupper($type)), 1);
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);
                 if(!empty($params['body'])) {
                     curl_setopt($curl, CURLOPT_POSTFIELDS, $params['body']);
                 }
@@ -366,7 +365,7 @@ class Helper
 
         $requestParams = array(
             'url'   => $url,
-            'type'  => 'post',
+            'type'  => 'put',
             'headers' => array(
                 'Content-Type: application/json',
                 'Accept: application/json'
