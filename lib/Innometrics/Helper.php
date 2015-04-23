@@ -220,9 +220,9 @@ class Helper
     public function getStreamData($content) {
         $data = $this->parseStreamData($content);
 
-        $this->setVar('profileId', $data->profile->id);
-        $this->setVar('collectApp', $data->session->collectApp);
-        $this->setVar('section', $data->session->session);
+        $this->setVar('profileId', $data['profile']['id']);
+        $this->setVar('collectApp', $data['session']['collectApp']);
+        $this->setVar('section', $data['session']['section']);
 
         return $data;
     }
@@ -238,12 +238,12 @@ class Helper
      *          $data = $helper->parseStreamData($content);
      *          var_dump($data);
      *          ------->
-     *          stdClass Object
+     *          Array
      *              (
-     *                  [profile]   => stdClass Object,
-     *                  [session]   => stdClass Object,
-     *                  [event]     => stdClass Object,
-     *                  [data]      => stdClass Object
+     *                  [profile]   => Array,
+     *                  [session]   => Array,
+     *                  [event]     => Array,
+     *                  [data]      => Array
      *              )
      *
      *      } catch (\ErrorException $e) {
@@ -293,7 +293,7 @@ class Helper
             'data'      => $session['events'][0]['data']
         );
 
-        return (object)$result;
+        return $result;
     }
 
     /**
@@ -329,12 +329,13 @@ class Helper
         ));
 
         $response = self::request(array('url' => $url));
-        $body = json_decode($response);
-        if(!isset($body->custom)) {
+        $body = json_decode($response, true);
+
+        if(!isset($body['custom'])) {
             throw new \ErrorException('Custom settings not found');
         }
 
-        return $body->custom;
+        return $body['custom'];
     }
 
     /**
@@ -370,7 +371,7 @@ class Helper
                 'Content-Type: application/json',
                 'Accept: application/json'
             ),
-            'body' => json_encode($settings)
+            'body' => json_encode(new \ArrayObject($settings))
         );
 
         return self::request($requestParams);
@@ -413,14 +414,14 @@ class Helper
 
         $response = self::request(array('url' => $url));
 
-        $body = json_decode($response);
+        $body = json_decode($response, true);
 
-        if(!isset($body->profile)) {
+        if(!isset($body['profile'])) {
             throw new \ErrorException('Profile not found');
         }
         $attributes = array();
-        if (!empty($body->profile->attributes)) {
-            $attributes = $body->profile->attributes;
+        if (!empty($body['profile']['attributes'])) {
+            $attributes = $body['profile']['attributes'];
         }
         return $attributes;
     }
@@ -432,7 +433,6 @@ class Helper
      * @return bool|string String with response or false if request failed
      */
     public function setAttributes($attributes, $params = null) {
-        $attributes = (object)$attributes;
         $params = (object)$params;
         $vars = self::mergeVars($this->getVars(), $params);
 
@@ -455,7 +455,7 @@ class Helper
                 'attributes' => array(array(
                     'collectApp'    => $vars->collectApp,
                     'section'       => $vars->section,
-                    'data'          => $attributes
+                    'data'          => new \ArrayObject($attributes)
                 ))
             ))
         );
