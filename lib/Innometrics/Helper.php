@@ -1,19 +1,44 @@
 <?php
 
-
 namespace Innometrics;
+
+use Innometrics\Profile;
 
 /**
  * InnoHelper TODO add description
  * @copyright 2015 Innometrics
  */
-class Helper
-{
+class Helper {
+
     /**
-     * Object with environment vars
-     * @var object
+     * Bucket name
+     * @var string
      */
-    protected $vars;
+    protected $bucketName = null;
+
+    /**
+     * Application name
+     * @var string
+     */
+    protected $appName = null;
+
+    /**
+     * Company id
+     * @var mixed
+     */
+    protected $groupId = null;
+
+    /**
+     * Application key
+     * @var string
+     */
+    protected $appKey = null;
+
+    /**
+     * API url
+     * @var string
+     */
+    protected $apiUrl = null;    
 
     /**
      * Construct Helper instance
@@ -27,78 +52,132 @@ class Helper
      *          "apiUrl"        => "http://api.innomdc.com"
      *      ));
      *
-     * @param object|array $vars Initial environment variables
+     * @param array $config Initial environment variables
      */
-    public function __construct($vars = null) {
-        if (is_null($vars)) {
-            $vars = array();
-        }
-        $this->setVars($vars);
+    public function __construct($config = array()) {
+        $this->validateConfig($config);
+        $this->groupId = $config['groupId'];
+        $this->apiUrl = $config['apiUrl'];
+        $this->bucketName = $config['bucketName'];
+        $this->appName = $config['appName'];
+        $this->appKey = $config['appKey'];   
+    }
+    
+    /**
+     * Get application name
+     * @return string
+     */
+    public function getCollectApp () {
+        return $this->appName;
     }
 
     /**
-     * Form URL to certain profile
+     * Get bucket name
+     * @return string
+     */
+    public function getBucket () {
+        return $this->bucketName;
+    }
+
+    /**
+     * Get company id
+     * @return mixed
+     */
+    public function getCompany () {
+        return $this->groupId;
+    }
+
+    /**
+     * Get application key
+     * @return string
+     */
+    public function getAppKey () {
+        return $this->appKey;
+    }
+
+    /**
+     * Get Api url
+     * @return string
+     */
+    public function getApiHost () {
+        return $this->apiUrl;
+    }
+    
+    /**
+     * Build Url for API request to work with certain Profile
      *
      * <b>Example:</b>
-     *      $url = $helper->webProfileAppUrl(array(
-     *          "groupId"       => "42",
-     *          "bucketName"    => "testbucket",
-     *          "profileId"     => "vze0bxh4qpso67t2dxfc7u81a5nxvefc"
-     *      ));
+     *      $url = $helper->getProfileUrl("vze0bxh4qpso67t2dxfc7u81a5nxvefc");
      *      echo $url;
      *      ------->
      *      http://api.innomdc.com/v1/companies/42/buckets/testbucket/profiles/vze0bxh4qpso67t2dxfc7u81a5nxvefc
      *
-     * @param object|array $params Custom parameters to form URL. If some/all parameters omitted, they will be taken from stored env. vars
+     * @param string $profileId
      * @return string URL to make API request
-     */
-    public function webProfileAppUrl($params = null) {
-        $vars = $this->getVars();
-        $params = is_null($params) ? $vars : (object)$params;
-        return sprintf('%s/v1/companies/%s/buckets/%s/profiles/%s', $vars->apiUrl, $params->groupId, $params->bucketName, $params->profileId);
+     */    
+    protected function getProfileUrl ($profileId) {
+        return sprintf(
+            '%s/v1/companies/%s/buckets/%s/profiles/%s?app_key=%s',
+            $this->getApiHost(),
+            $this->getCompany(),
+            $this->getBucket(),
+            $profileId,
+            $this->getAppKey()
+        );
     }
 
     /**
-     * Form URL to certain profile using App key
+     * Build Url for API request to work with application settings
      *
      * <b>Example:</b>
-     *      $url = $this->profileAppUrl(array(
-     *          "profileId"     => "vze0bxh4qpso67t2dxfc7u81a5nxvefc",
-     *          "appKey"        => "3R0o0m5a8n7"
-     *      ));
-     *      echo $url;
-     *      ------->
-     *      http://api.innomdc.com/v1/companies/42/buckets/testbucket/profiles/vze0bxh4qpso67t2dxfc7u81a5nxvefc?app_key=3R0o0m5a8n7
-     *
-     * @param object|array $params Custom parameters to form URL. If some/all parameters omitted, they will be taken from stored env. vars
-     * @return string URL to make API request
-     */
-    protected function profileAppUrl($params = null) {
-        $params = is_null($params) ? $this->getVars() : (object)$params;
-        return sprintf('%s?app_key=%s', $this->webProfileAppUrl($params), $params->appKey);
-    }
-
-    /**
-     * Form URL to app settings
-     *
-     * <b>Example:</b>
-     *      $url = $this->settingsAppUrl(array(
-     *          "bucketName"    => "testbucket",
-     *          "appName"       => "testapp"
-     *      ));
+     *      $url = $this->getAppSettingsUrl();
      *      echo $url;
      *      ------->
      *      http://api.innomdc.com/v1/companies/42/buckets/testbucket/apps/testapp/custom?app_key=8HJ3hnaxErdJJ62H
      *
-     * @param object|array $params Custom parameters to form URL. If some/all parameters omitted, they will be taken from stored env. vars
      * @return string URL to make API request
-     */
-    protected function settingsAppUrl($params = null) {
-        $vars = $this->getVars();
-        $params = is_null($params) ? $vars : (object)$params;
-        return sprintf('%s/v1/companies/%s/buckets/%s/apps/%s/custom?app_key=%s', $vars->apiUrl, $params->groupId, $params->bucketName, $params->appName, $params->appKey);
+     */    
+    protected function getAppSettingsUrl () {
+        return sprintf(
+            '%s/v1/companies/%s/buckets/%s/apps/%s/custom?app_key=%s',
+            $this->getApiHost(),
+            $this->getCompany(),
+            $this->getBucket(),
+            $this->getCollectApp(),
+            $this->getAppKey()
+        );
     }
 
+    /**
+     * Build Url for API request to work with segments
+     * @return string
+     */
+    protected function getSegmentsUrl () {
+        return sprintf(
+            '%s/v1/companies/%s/buckets/%s/segments?app_key=%s',
+            $this->getApiHost(),
+            $this->getCompany(),
+            $this->getBucket(),
+            $this->getAppKey()
+        );
+    }
+
+    /**
+     * Build Url for API request to work with segments
+     * @param array $params
+     * @return string
+     */
+    public function getSegmentEvaluationUrl ($params = array()) {
+        return sprintf(
+            '%s/v1/companies/%s/buckets/%s/segment-evaluation?app_key=%s&%s',
+            $this->getApiHost(),
+            $this->getCompany(),
+            $this->getBucket(),
+            $this->getAppKey(),
+            http_build_query($params)
+        );
+    }
+    
     /**
      * Internal method to make http requests, curl used
      * @param array $params List of parameters to configure request
@@ -109,89 +188,542 @@ class Helper
      * * $params['headers'] - array. Custom HTTP headers
      * @return string|bool string with response or false if request failed
      */
-    protected static function request($params) {
+    protected static function request ($params) {
         $curl = curl_init();
+        
         $type = strtolower(isset($params['type']) ? $params['type'] : 'get');
         switch ($type) {
             case 'post':
             case 'put':
                 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);
-                if(!empty($params['body'])) {
+                if (!empty($params['body'])) {
                     curl_setopt($curl, CURLOPT_POSTFIELDS, $params['body']);
                 }
                 break;
 
             case 'get':
             default:
-                if(!empty($params['qs'])) {
-                    $params['url'] .= '?'.http_build_query($params['qs']);
+                if (!empty($params['qs'])) {
+                    $params['url'] .= '?' . http_build_query($params['qs']);
                 }
                 break;
         }
-        if(!empty($params['headers'])) {
+        
+        if (!empty($params['headers'])) {
             curl_setopt($curl, CURLOPT_HTTPHEADER, $params['headers']);
         }
+        
         curl_setopt($curl, CURLOPT_URL, $params['url']);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($curl);
-        curl_close ($curl);
-
-        return $response;
+        
+        if ($response === false) {
+            $error = curl_error($curl) ? curl_error($curl) : 'Unknown error';
+            throw new \ErrorException($error);
+        } else {
+            curl_close($curl);
+            return $response;
+        }        
     }
-
+    
     /**
-     * Get environment vars
+     * Get application settings
      *
      * <b>Example:</b>
-     *      $vars = $helper->getVars();
-     *      var_dump($vars);
-     *      ------->
-     *      stdClass Object
-     *      (
-     *          [bucketName]    => "testbucket",
-     *          [appKey]        => "8HJ3hnaxErdJJ62H",
-     *          [appName]       => "testapp",
-     *          [groupId]       => "4",
-     *          [apiUrl]        => "http://api.innomdc.com",
-     *          [collectApp]    => "web",
-     *          [section]       => "testsection",
-     *          [profileId]     => "omrd9lsa70bqukicsctlcvcu97xwehgm"
-     *       )
+     *      try {
+     *          $settings = $helper->getSettings();
+     *          var_dump($settings);
+     *          ------->
+     *          [
+     *              "stringSetting" => "qwe",
+     *              "numberSetting" => 1,
+     *              "arraySetting"  => ["one","two"]
+     *          ]
      *
-     * @return object
+     *      } catch (\ErrorException $e) {
+     *          // application has not settings at all
+     *      }
+     *
+     * @param object|array $params Custom environment vars for retrieve settings
+     * @return array
+     * @throws \ErrorException If settings are not found exception will be thrown
      */
-    public function getVars() {
-        return $this->vars;
+    public function getAppSettings () {
+        $url = $this->getAppSettingsUrl();
+        $response = $this->request(array(
+            'url' => $url,
+            'headers' => array(
+                'Content-Type: application/json',
+                'Accept: application/json'
+            )
+        ));
+        $body = json_decode($response, true);
+        
+        $this->checkErrors($body);
+
+        if (!isset($body['custom'])) {
+            throw new \ErrorException('Custom settings not found');
+        }
+
+        return $body['custom'];
     }
 
     /**
-     * Set environment vars
+     * Update application settings
      *
      * <b>Example:</b>
-     *      $helper->setVars(array(
-     *          "bucketName"    => "mybucket",
-     *          "appName"       => "coolapp"
+     *      $helper->setSettings(array(
+     *          "stringSetting" => "foo",
+     *          "numberSetting" => 42,
+     *          "arraySetting"  => ["bar","baz"]
      *      ));
      *
-     * @param object|array $vars Key=>value pairs with environment vars
+     * @param object|array $settings Settings as key=>value pairs
+     * @return bool|string
      */
-    public function setVars($vars) {
-        $this->vars = (object)$vars;
+    public function setAppSettings ($settings) {
+        if (!is_array($settings)) {
+            throw new \ErrorException('Settings should be an array');
+        }        
+        
+        $settings = (object)$settings;
+        $url = $this->getAppSettingsUrl();
+
+        $requestParams = array(
+            'url'   => $url,
+            'type'  => 'put',
+            'headers' => array(
+                'Content-Type: application/json',
+                'Accept: application/json'
+            ),
+            'body' => json_encode(new \ArrayObject($settings))
+        );
+
+        $response = $this->request($requestParams);
+        $body = json_decode($response, true);
+        
+        $this->checkErrors($body);
+    }
+    
+    /**
+     * Get segments
+     * @param {Function} callback
+     */
+    public function getSegments () {
+//        var self = this;
+//        var opts = {
+//            url: this.getSegmentsUrl(),
+//            json: true
+//        };
+//
+//        request.get(opts, function (error, response) {
+//            var data = null;
+//            var segments = [];
+//            
+//            error = self.checkErrors(error, response);
+//
+//            if (!error) {
+//                data = response.body;
+//                data = util.isArray(data) ? data : [];
+//                data.forEach(function (sgmData) {
+//                    var sgmInstance = null;
+//                    if (sgmData.hasOwnProperty('segment') && typeof sgmData.segment === 'object') {
+//                        try {
+//                            sgmInstance = new Segment(sgmData.segment);
+//                            segments.push(sgmInstance);
+//                        }catch (e) {
+//                            console.error(e);
+//                        }
+//                    }
+//                });
+//            }
+//
+//            callback(error, segments);
+//        });
     }
 
     /**
-     * Set environment variable by name
-     *
-     * <b>Example:</b>
-     *      $helper->setVar("bucketName", "mybucket");
-     *
-     * @param string $name Variable name
-     * @param mixed $value Variable value
+     * Evaluate profile by segment
+     * @param {Profile} profile
+     * @param {Segment} segment
+     * @param {Function} callback
      */
-    public function setVar($name, $value) {
-        $this->vars->{$name} = $value;
+    public function evaluateProfileBySegment ($profile, $segment) {
+//        var error = null;
+//        var result = null;
+//        if (!(segment instanceof Segment)) {
+//            error = new Error('Argument "segment" should be a Segment instance');
+//            return callback(error, result);
+//        }
+//        
+//        this.evaluateProfileBySegmentId(profile, segment.getId(), callback);
     }
 
+    /**
+     * Evaluate profile by segment's id
+     * @param {Profile} profile
+     * @param {String} segmentId
+     * @param {Function} callback
+     */
+    public function evaluateProfileBySegmentId ($profile, $segmentId) {
+//        this._evaluateProfileByParams(profile, {
+//            segment_id: segmentId
+//        }, callback);
+    }
+
+    /**
+     * Evaluate profile by IQL expression
+     * @param {Profile} profile
+     * @param {String} iql
+     * @param {Function} callback
+     */
+    public function evaluateProfileByIql ($profile, $iql) {
+//        this._evaluateProfileByParams(profile, {
+//            iql: iql
+//        }, callback);
+    }
+
+    /**
+     *
+     * @param {String} profileId
+     * @param {Function} callback
+     */
+    public function loadProfile ($profileId) {
+        if (gettype(trim($profileId)) !== 'string') {
+            throw new \ErrorException('ProfileId should be a non-empty string');
+        }
+        
+        $url = $this->getProfileUrl($profileId);
+        $requestParams = array(
+            'url'   => $url,
+            'type'  => 'get',
+            'headers' => array(
+                'Content-Type: application/json',
+                'Accept: application/json'
+            )            
+        );
+
+        $response = $this->request($requestParams);
+        $body = json_decode($response, true);
+        
+        $this->checkErrors($body);
+        
+        $profile = new Profile($body['profile']);
+        return $profile;
+    }
+
+    /**
+     * Make Api request to delete profile
+     * @param {String} profileId
+     * @param {Function} callback
+     */
+    public function deleteProfile ($profileId) {
+//        var self = this;
+//        var opts = {
+//            url: this.getProfileUrl(profileId),
+//            json: true
+//        };
+//
+//        request.del(opts, function (error, response) {
+//            error = self.checkErrors(error, response, 204);
+//
+//            if (typeof callback === 'function') {
+//                callback(error);
+//            }
+//        });
+    }
+
+    /**
+     * Make Api request to save profile in DH
+     * @param {Profile} profile
+     * @param {Function} callback
+     */
+    public function saveProfile ($profile) {
+//        var self = this;
+//        var error = null;
+//        var result = null;
+//        
+//        if (!(profile instanceof Profile)) {
+//            error = new Error('Argument "profile" should be a Profile instance');
+//            if (typeof callback === 'function') {
+//                callback(error, result);
+//            }
+//            return;
+//        }
+//        
+//        var profileId = profile.getId();
+//        var opts = {
+//            url: this.getProfileUrl(profileId),
+//            body: profile.serialize(),
+//            json: true
+//        };
+//
+//        request.post(opts, function (error, response) {
+//            var data;
+//            error = self.checkErrors(error, response, [200, 201]);
+//
+//            if (!error) {
+//                data = response.body;
+//                if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
+//                    try {
+//                        profile = new Profile(data.profile);
+//                    } catch (e) {
+//                        error = e;
+//                    }
+//                }
+//            }
+//
+//            if (typeof callback === 'function') {
+//                callback(error, profile);
+//            }
+//        });
+    }
+
+    /**
+     * Make Api request to merge two profiles
+     * @param {Profile} profile1
+     * @param {Profile} profile2
+     * @param {Function} callback
+     */
+    public function mergeProfiles ($profile1, $profile2) {
+//        var self = this;
+//        var error = null;
+//        var result = null;
+//        
+//        if (!(profile1 instanceof Profile)) {
+//            error = new Error('Argument "profile1" should be a Profile instance');
+//        } else if (!(profile2 instanceof Profile)) {
+//            error = new Error('Argument "profile2" should be a Profile instance');
+//        }
+//        
+//        if (error) {
+//            if (typeof callback === 'function') {
+//                callback(error, result);
+//            }
+//            return;
+//        }
+//        
+//        var profileId = profile1.getId();
+//        var opts = {
+//            url: this.getProfileUrl(profileId),
+//            body: {
+//                id: profileId,
+//                mergedProfiles: [
+//                    profile2.getId()
+//                ]
+//            },
+//            json: true
+//        };
+//        
+//        request.post(opts, function (error, response) {
+//            var data;
+//            var profile = null;
+//
+//            error = self.checkErrors(error, response, [200, 201]);
+//
+//            if (!error) {
+//                data = response.body;
+//                if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
+//                    try {
+//                        profile = new Profile(data.profile);
+//                    } catch (e) {
+//                        error = e;
+//                    }
+//                }
+//            }
+//
+//            if (typeof callback === 'function') {
+//                callback(error, profile);
+//            }
+//
+//        });
+    }
+
+    /**
+     * Refresh  local profile with data from DH
+     * @param {Profile} profile
+     * @param {Function} callback
+     */
+    public function refreshLocalProfile ($profile) {
+//        var error = null;
+//        var result = null;
+//        
+//        if (!(profile instanceof Profile)) {
+//            error = new Error('Argument "profile" should be a Profile instance');
+//            if (typeof callback === 'function') {
+//                callback(error, result);
+//            }
+//            return;
+//        }
+//        
+//        var profileId = profile.getId();
+//
+//        this.loadProfile(profileId, function (error, loadedProfile) {
+//            if (!error) {
+//                profile.merge(loadedProfile);
+//            }
+//            
+//            if (typeof callback === 'function') {
+//                callback(error, profile);
+//            }
+//        });
+    }
+
+    /**
+     * Try to parse profile data from request made by DH
+     * @param {String} requestBody
+     * @returns {Profile}
+     */
+    public function getProfileFromRequest ($requestBody) {
+//        try {
+//            if (typeof requestBody !== 'object') {
+//                requestBody = JSON.parse(requestBody);
+//            }
+//        } catch (e) {
+//            throw new Error('Wrong stream data');
+//        }
+//        var profile = requestBody.profile;
+//        if (!profile) {
+//            throw new Error('Profile not found');
+//        }
+//        return new Profile(profile);
+    }
+
+    /**
+     *
+     * @param {String} requestBody
+     * @returns {Object}
+     */
+    public function getMetaFromRequest ($requestBody) {
+//        try {
+//            if (typeof requestBody !== 'object') {
+//                requestBody = JSON.parse(requestBody);
+//            }
+//        } catch (e) {
+//            throw new Error('Wrong stream data');
+//        }
+//        var meta = requestBody.meta;
+//        if (!meta) {
+//            throw new Error('Meta not found');
+//        }
+//        return meta;
+    }
+
+    /**
+     * Create empty local profile with certain id
+     * @param {String} profileId
+     * @returns {Profile}
+     */
+    public function createProfile ($profileId) {
+//        return new Profile({
+//            id: profileId,
+//            version: '1.0',
+//            sessions: [],
+//            attributes: [],
+//            mergedProfiles: []
+//        });
+    }
+
+    /**
+     * Check that certain object has all fields from list
+     * @param {Object} obj
+     * @param {Array} fields
+     * @returns {Error|null}
+     * @private
+     */
+    public function validateObject ($obj, $fields) {
+//        var error = null;
+//        if (typeof obj !== 'object') {
+//            error = new Error('Object is not defined');
+//        } else {
+//            try {
+//                fields = Array.isArray(fields) ? fields : [fields];
+//                fields.forEach(function (key) {
+//                    if (!(key in obj)) {
+//                        throw new Error(key.toUpperCase() + ' not found');
+//                    }
+//                });
+//            } catch (e) {
+//                error = e;
+//            }
+//        }
+//        return error;
+    }
+
+    /**
+     * Check for error and that response has allowed statusCode and required field(s)
+     * @param array $response
+     * @param integer|array $successCode
+     */
+    protected function checkErrors ($response, $successCode = 200) {
+        $successCode = (array)$successCode;
+        
+        if (!$response) {
+            throw new \ErrorException('Empty response');
+        }
+        
+        if (isset($response['statusCode']) && !in_array($response['statusCode'], $successCode)) {
+            throw new \ErrorException('Server failed with status code ' . $response['message']);
+        }        
+    }
+
+    /**
+     *
+     * @param {Profile} profile
+     * @param {Object} params
+     * @param {Function} callback
+     * @private
+     */
+    protected function _evaluateProfileByParams ($profile, $params) {
+//        var self = this;
+//        var error = null;
+//        var result = null;
+//
+//        if (!(profile instanceof Profile)) {
+//            error = new Error('Argument "profile" should be a Profile instance');
+//            return callback(error, result);
+//        }
+//
+//        var defParams = {
+//            profile_id: profile.getId()
+//        };
+//
+//        params = util._extend(params, defParams);
+//
+//        var opts = {
+//            url: this.getSegmentEvaluationUrl(params),
+//            json: true
+//        };
+//
+//        request.get(opts, function (error, response) {
+//
+//            var data;
+//
+//            error = self.checkErrors(error, response);
+//
+//            if (!error) {
+//                data = response.body;
+//                if (data.hasOwnProperty('segmentEvaluation') && data.segmentEvaluation.hasOwnProperty('result')) {
+//                    result = data.segmentEvaluation.result;
+//                }
+//            }
+//
+//            callback(error, result);
+//        });
+    }    
+    
+    
+    
+
+
+    
+    
+    
+    
+    
+    
+    
+    
     /**
      * Parse start session data and set found environment variables
      *
@@ -296,86 +828,6 @@ class Helper
         return $result;
     }
 
-    /**
-     * Get application settings
-     *
-     * <b>Example:</b>
-     *      try {
-     *          $settings = $helper->getSettings();
-     *          var_dump($settings);
-     *          ------->
-     *          [
-     *              "stringSetting" => "qwe",
-     *              "numberSetting" => 1,
-     *              "arraySetting"  => ["one","two"]
-     *          ]
-     *
-     *      } catch (\ErrorException $e) {
-     *          // application has not settings at all
-     *      }
-     *
-     * @param object|array $params Custom environment vars for retrieve settings
-     * @return array
-     * @throws \ErrorException If settings are not found exception will be thrown
-     */
-    public function getSettings($params = null) {
-        $params = (object)$params;
-        $vars = self::mergeVars($this->getVars(), $params);
-        $url = $this->settingsAppUrl(array(
-            'groupId'       => $vars->groupId,
-            'bucketName'    => $vars->bucketName,
-            'appKey'        => $vars->appKey,
-            'appName'       => $vars->appName
-        ));
-
-        $response = self::request(array('url' => $url));
-        $body = json_decode($response, true);
-
-        if(!isset($body['custom'])) {
-            throw new \ErrorException('Custom settings not found');
-        }
-
-        return $body['custom'];
-    }
-
-    /**
-     * Update application settings
-     *
-     * <b>Example:</b>
-     *      $helper->setSettings(array(
-     *          "stringSetting" => "foo",
-     *          "numberSetting" => 42,
-     *          "arraySetting"  => ["bar","baz"]
-     *      ));
-     *
-     * @param object|array $settings Settings as key=>value pairs
-     * @param object|array $params Custom environment vars for update operation
-     * @return bool|string
-     */
-    public function setSettings ($settings, $params = null) {
-        $settings = (object)$settings;
-        $params = (object)$params;
-        $vars = self::mergeVars($this->getVars(), $params);
-
-        $url = $this->settingsAppUrl(array(
-            'groupId'       => $vars->groupId,
-            'bucketName'    => $vars->bucketName,
-            'appKey'        => $vars->appKey,
-            'appName'       => $vars->appName
-        ));
-
-        $requestParams = array(
-            'url'   => $url,
-            'type'  => 'put',
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            ),
-            'body' => json_encode(new \ArrayObject($settings))
-        );
-
-        return self::request($requestParams);
-    }
 
     /**
      * Get attributes of the profile
@@ -403,7 +855,7 @@ class Helper
      */
     public function getAttributes($params = null) {
         $params = (object)$params;
-        $vars = self::mergeVars($this->getVars(), $params);
+        $vars = $this->mergeVars($this->getVars(), $params);
 
         $url = $this->profileAppUrl(array(
             'groupId'       => $vars->groupId,
@@ -412,7 +864,7 @@ class Helper
             'profileId'     => $vars->profileId
         ));
 
-        $response = self::request(array('url' => $url));
+        $response = $this->request(array('url' => $url));
 
         $body = json_decode($response, true);
 
@@ -434,7 +886,7 @@ class Helper
      */
     public function setAttributes($attributes, $params = null) {
         $params = (object)$params;
-        $vars = self::mergeVars($this->getVars(), $params);
+        $vars = $this->mergeVars($this->getVars(), $params);
 
         $url = $this->profileAppUrl(array(
             'groupId'       => $vars->groupId,
@@ -460,40 +912,57 @@ class Helper
             ))
         );
 
-        return self::request($requestParams);
+        return $this->request($requestParams);
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     /**
-     * Helper method to merge 2 objects/assoc arrays to one object
-     * Values in $overrides will overwrite values in $main if they have same keys
-     *
-     * <b>Example:</b>
-     *      ......
-     *      $a = array('a' => 1, 'b' => 2);
-     *      $b = (object)array('b' => 10, 'c' => 'asd');
-     *      $res = self::mergeVars($a, $b);
-     *      var_dump($res);
-     *      ------->
-     *      stdClass Object
-     *       (
-     *           [a] => 1
-     *           [b] => 10
-     *           [c] => 'asd'
-     *       )
-     *      ......
-     *
-     * @param object|array $main
-     * @param object|array $overrides
-     * @return object
+     * Checks if config is valid
+     * @throws \ErrorException If config are not suitable exception will be thrown
      */
-    protected static function mergeVars($main, $overrides) {
-        $main = (object)$main;
-        $overrides = (object)$overrides;
-        $keys = array_merge(get_object_vars($main), get_object_vars($overrides));
-        $vars = array();
-        foreach ($keys as $k=>$v) {
-            $vars[$k] = isset($overrides->$k) ? $overrides->$k : $main->$k;
+    protected function validateConfig ($config = array()) {
+        if (!is_array($config)) {
+            throw new \ErrorException('Config should be an array');
         }
-        return (object)$vars;
-    }
+
+        $fields = array('bucketName', 'appName', 'appKey', 'apiUrl');
+        foreach ($fields as $field) {
+            if (!array_key_exists($field, $config)) {
+                throw new \ErrorException('Property "' . field . '" in config should be defined');
+            }
+            if (gettype($config[$field]) !== 'string') {
+                throw new \ErrorException('Property "' . field . '" in config should be a string');
+            }
+            if (!trim($config[$field])) {
+                throw new \ErrorException('Property "' . field . '" in config can not be empty');
+            }
+        }
+
+        if (!array_key_exists('groupId', $config)) {
+            throw new \ErrorException('Property "groupId" in config should be defined');
+        }
+        
+        $groupId = $config['groupId'];
+        $groupIdType = gettype($groupId);
+        if ($groupIdType !== 'string' && $groupIdType !== 'integer') {
+            throw new \ErrorException('Property "groupId" in config should be a string or a number');
+        }
+        if (!trim((string)$groupId)) {
+            throw new \ErrorException('Property "groupId" in config can not be empty');
+        }
+    } 
 }
