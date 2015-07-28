@@ -3,6 +3,7 @@
 namespace Innometrics;
 
 use Innometrics\Profile;
+use Innometrics\Segment;
 
 /**
  * InnoHelper TODO add description
@@ -307,86 +308,75 @@ class Helper {
     
     /**
      * Get segments
-     * @param {Function} callback
+     * @return Segment[]
      */
     public function getSegments () {
-//        var self = this;
-//        var opts = {
-//            url: this.getSegmentsUrl(),
-//            json: true
-//        };
-//
-//        request.get(opts, function (error, response) {
-//            var data = null;
-//            var segments = [];
-//            
-//            error = self.checkErrors(error, response);
-//
-//            if (!error) {
-//                data = response.body;
-//                data = util.isArray(data) ? data : [];
-//                data.forEach(function (sgmData) {
-//                    var sgmInstance = null;
-//                    if (sgmData.hasOwnProperty('segment') && typeof sgmData.segment === 'object') {
-//                        try {
-//                            sgmInstance = new Segment(sgmData.segment);
-//                            segments.push(sgmInstance);
-//                        }catch (e) {
-//                            console.error(e);
-//                        }
-//                    }
-//                });
-//            }
-//
-//            callback(error, segments);
-//        });
+        $url = $this->getSegmentsUrl();
+        $response = $this->request(array(
+            'url' => $url,
+            'headers' => array(
+                'Content-Type: application/json',
+                'Accept: application/json'
+            )
+        ));
+
+        $body = json_decode($response, true);
+        
+        $this->checkErrors($body);
+
+        if (is_array($body)) {
+            foreach ($body as $sgmData) {
+                if (isset($sgmData['segment']) && is_array($sgmData['segment'])) {
+                    $segments[] = new Segment($sgmData['segment']);
+                }
+            }
+        }
+        
+        return $segments;
     }
 
     /**
      * Evaluate profile by segment
-     * @param {Profile} profile
-     * @param {Segment} segment
-     * @param {Function} callback
+     * @param Profile $profile
+     * @param Segment $segment
+     * @return bool
      */
     public function evaluateProfileBySegment ($profile, $segment) {
-//        var error = null;
-//        var result = null;
-//        if (!(segment instanceof Segment)) {
-//            error = new Error('Argument "segment" should be a Segment instance');
-//            return callback(error, result);
-//        }
-//        
-//        this.evaluateProfileBySegmentId(profile, segment.getId(), callback);
+        if (!($segment instanceof Segment)) {
+            throw new \ErrorException('Argument "segment" should be a Segment instance');
+        }
+        
+        return $this->evaluateProfileBySegmentId($profile, $segment->getId());
     }
 
     /**
      * Evaluate profile by segment's id
-     * @param {Profile} profile
-     * @param {String} segmentId
-     * @param {Function} callback
+     * @param Profile $profile
+     * @param string $segmentId
+     * @return bool
      */
     public function evaluateProfileBySegmentId ($profile, $segmentId) {
-//        this._evaluateProfileByParams(profile, {
-//            segment_id: segmentId
-//        }, callback);
+        return $this->_evaluateProfileByParams($profile, array(
+            'segment_id' => $segmentId
+        ));
     }
 
     /**
      * Evaluate profile by IQL expression
-     * @param {Profile} profile
-     * @param {String} iql
-     * @param {Function} callback
+     * @param Profile $profile
+     * @param string $iql
+     * @return bool
      */
     public function evaluateProfileByIql ($profile, $iql) {
-//        this._evaluateProfileByParams(profile, {
-//            iql: iql
-//        }, callback);
+        return $this->_evaluateProfileByParams($profile, array(
+            'iql' => $iql
+        ));
     }
 
     /**
      *
-     * @param {String} profileId
-     * @param {Function} callback
+     * @param string $profileId
+     * @return Profile
      */
     public function loadProfile ($profileId) {
         if (gettype(trim($profileId)) !== 'string') {
@@ -663,53 +653,44 @@ class Helper {
         }
         
         if (isset($response['statusCode']) && !in_array($response['statusCode'], $successCode)) {
-            throw new \ErrorException('Server failed with status code ' . $response['message']);
+            throw new \ErrorException(sprintf('Server failed with status code %s: "%s"', $response['statusCode'], $response['message']));
         }        
     }
 
     /**
      *
-     * @param {Profile} profile
-     * @param {Object} params
-     * @param {Function} callback
-     * @private
+     * @param Profile $profile
+     * @param array $params
      */
     protected function _evaluateProfileByParams ($profile, $params) {
-//        var self = this;
-//        var error = null;
-//        var result = null;
-//
-//        if (!(profile instanceof Profile)) {
-//            error = new Error('Argument "profile" should be a Profile instance');
-//            return callback(error, result);
-//        }
-//
-//        var defParams = {
-//            profile_id: profile.getId()
-//        };
-//
-//        params = util._extend(params, defParams);
-//
-//        var opts = {
-//            url: this.getSegmentEvaluationUrl(params),
-//            json: true
-//        };
-//
-//        request.get(opts, function (error, response) {
-//
-//            var data;
-//
-//            error = self.checkErrors(error, response);
-//
-//            if (!error) {
-//                data = response.body;
-//                if (data.hasOwnProperty('segmentEvaluation') && data.segmentEvaluation.hasOwnProperty('result')) {
-//                    result = data.segmentEvaluation.result;
-//                }
-//            }
-//
-//            callback(error, result);
-//        });
+        if (!($profile instanceof Profile)) {
+            throw new \ErrorException('Argument "profile" should be a Profile instance');
+        }
+
+        $defParams = array(
+            'profile_id' => $profile->getId()
+        );
+
+        $params = array_merge($params, $defParams);
+        
+        $url = $this->getSegmentEvaluationUrl($params);
+        
+        $response = $this->request(array(
+            'url' => $url,
+            'headers' => array(
+                'Content-Type: application/json',
+                'Accept: application/json'
+            )
+        ));
+        $body = json_decode($response, true);
+        
+        $this->checkErrors($body);  
+        
+        if (!(isset($body['segmentEvaluation']) && isset($body['segmentEvaluation']['result']))) {
+            throw new \ErrorExcepion('Wrong evaluation response: ' . $body);
+        }
+        
+        return $body['segmentEvaluation']['result'];
     }    
     
     
