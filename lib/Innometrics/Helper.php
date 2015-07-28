@@ -196,6 +196,7 @@ class Helper {
         switch ($type) {
             case 'post':
             case 'put':
+            case 'delete':
                 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);
                 if (!empty($params['body'])) {
                     curl_setopt($curl, CURLOPT_POSTFIELDS, $params['body']);
@@ -404,240 +405,167 @@ class Helper {
 
     /**
      * Make Api request to delete profile
-     * @param {String} profileId
-     * @param {Function} callback
+     * @param string $profileId
+     * @return bool
      */
     public function deleteProfile ($profileId) {
-//        var self = this;
-//        var opts = {
-//            url: this.getProfileUrl(profileId),
-//            json: true
-//        };
-//
-//        request.del(opts, function (error, response) {
-//            error = self.checkErrors(error, response, 204);
-//
-//            if (typeof callback === 'function') {
-//                callback(error);
-//            }
-//        });
+        if (gettype(trim($profileId)) !== 'string') {
+            throw new \ErrorException('ProfileId should be a non-empty string');
+        }
+        
+        $url = $this->getProfileUrl($profileId);
+        $requestParams = array(
+            'url'   => $url,
+            'type'  => 'delete',
+            'headers' => array(
+                'Content-Type: application/json',
+                'Accept: application/json'
+            )            
+        );
+
+        $response = $this->request($requestParams);
+        $body = json_decode($response, true);
+        
+        $this->checkErrors($body, 204);
+        
+        return true;
     }
 
     /**
      * Make Api request to save profile in DH
-     * @param {Profile} profile
-     * @param {Function} callback
+     * @param Profile $profile
+     * @return Profile
      */
     public function saveProfile ($profile) {
-//        var self = this;
-//        var error = null;
-//        var result = null;
-//        
-//        if (!(profile instanceof Profile)) {
-//            error = new Error('Argument "profile" should be a Profile instance');
-//            if (typeof callback === 'function') {
-//                callback(error, result);
-//            }
-//            return;
-//        }
-//        
-//        var profileId = profile.getId();
-//        var opts = {
-//            url: this.getProfileUrl(profileId),
-//            body: profile.serialize(),
-//            json: true
-//        };
-//
-//        request.post(opts, function (error, response) {
-//            var data;
-//            error = self.checkErrors(error, response, [200, 201]);
-//
-//            if (!error) {
-//                data = response.body;
-//                if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
-//                    try {
-//                        profile = new Profile(data.profile);
-//                    } catch (e) {
-//                        error = e;
-//                    }
-//                }
-//            }
-//
-//            if (typeof callback === 'function') {
-//                callback(error, profile);
-//            }
-//        });
+        if (!($profile instanceof Profile)) {
+            throw new \ErrorException('Argument "profile" should be a Profile instance');
+        }
+        
+        $profileId = $profile->getId();
+        $url = $this->getProfileUrl($profileId);
+        $requestParams = array(
+            'url'   => $url,
+            'type'  => 'post',
+            'headers' => array(
+                'Content-Type: application/json',
+                'Accept: application/json'
+            ),
+            'body' => json_encode($profile->serialize())
+        );   
+        
+        $response = $this->request($requestParams);
+        $body = json_decode($response, true);
+        
+        $this->checkErrors($body, array(200, 201));     
+        
+        if (isset($body['profile']) && is_array($body['profile'])) {
+            $profile = new Profile($body['profile']);
+        }
+        
+        return $profile;
     }
 
     /**
      * Make Api request to merge two profiles
-     * @param {Profile} profile1
-     * @param {Profile} profile2
-     * @param {Function} callback
+     * @param Profile profile1
+     * @param Profile profile2
+     * @return Profile
      */
     public function mergeProfiles ($profile1, $profile2) {
-//        var self = this;
-//        var error = null;
-//        var result = null;
-//        
-//        if (!(profile1 instanceof Profile)) {
-//            error = new Error('Argument "profile1" should be a Profile instance');
-//        } else if (!(profile2 instanceof Profile)) {
-//            error = new Error('Argument "profile2" should be a Profile instance');
-//        }
-//        
-//        if (error) {
-//            if (typeof callback === 'function') {
-//                callback(error, result);
-//            }
-//            return;
-//        }
-//        
-//        var profileId = profile1.getId();
-//        var opts = {
-//            url: this.getProfileUrl(profileId),
-//            body: {
-//                id: profileId,
-//                mergedProfiles: [
-//                    profile2.getId()
-//                ]
-//            },
-//            json: true
-//        };
-//        
-//        request.post(opts, function (error, response) {
-//            var data;
-//            var profile = null;
-//
-//            error = self.checkErrors(error, response, [200, 201]);
-//
-//            if (!error) {
-//                data = response.body;
-//                if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
-//                    try {
-//                        profile = new Profile(data.profile);
-//                    } catch (e) {
-//                        error = e;
-//                    }
-//                }
-//            }
-//
-//            if (typeof callback === 'function') {
-//                callback(error, profile);
-//            }
-//
-//        });
+        if (!($profile1 instanceof Profile)) {
+            throw new \ErrorException('Argument "profile1" should be a Profile instance');
+        } else if (!($profile2 instanceof Profile)) {
+            throw new \ErrorException('Argument "profile2" should be a Profile instance');
+        }
+        
+        $profileId = $profile1->getId();
+        $url = $this->getProfileUrl($profileId);
+        $requestParams = array(
+            'url'   => $url,
+            'type'  => 'post',
+            'headers' => array(
+                'Content-Type: application/json',
+                'Accept: application/json'
+            ),
+            'body' => json_encode(array(
+                'id' => $profileId,
+                'mergedProfiles' => array(
+                    $profile2->getId()
+                )
+            ))
+        );
+        
+        $response = $this->request($requestParams);
+        $body = json_decode($response, true);
+        
+        $this->checkErrors($body, array(200, 201));     
+        
+        $profile = null;
+        if (isset($body['profile']) && is_array($body['profile'])) {
+            $profile = new Profile($body['profile']);
+        }
+        
+        return $profile;        
     }
 
     /**
      * Refresh  local profile with data from DH
-     * @param {Profile} profile
-     * @param {Function} callback
+     * @param Profile $profile
+     * @return Profile
      */
     public function refreshLocalProfile ($profile) {
-//        var error = null;
-//        var result = null;
-//        
-//        if (!(profile instanceof Profile)) {
-//            error = new Error('Argument "profile" should be a Profile instance');
-//            if (typeof callback === 'function') {
-//                callback(error, result);
-//            }
-//            return;
-//        }
-//        
-//        var profileId = profile.getId();
-//
-//        this.loadProfile(profileId, function (error, loadedProfile) {
-//            if (!error) {
-//                profile.merge(loadedProfile);
-//            }
-//            
-//            if (typeof callback === 'function') {
-//                callback(error, profile);
-//            }
-//        });
+        if (!($profile instanceof Profile)) {
+            throw new \ErrorException('Argument "profile" should be a Profile instance');
+        }
+        
+        $profileId = $profile->getId();
+        $loadedProfile = $this->loadProfile($profileId);
+        $profile->merge($loadedProfile);
+        
+        return $profile;
     }
 
     /**
      * Try to parse profile data from request made by DH
-     * @param {String} requestBody
-     * @returns {Profile}
+     * @param string $requestBody
+     * @return Profile
      */
     public function getProfileFromRequest ($requestBody) {
-//        try {
-//            if (typeof requestBody !== 'object') {
-//                requestBody = JSON.parse(requestBody);
-//            }
-//        } catch (e) {
-//            throw new Error('Wrong stream data');
-//        }
-//        var profile = requestBody.profile;
-//        if (!profile) {
-//            throw new Error('Profile not found');
-//        }
-//        return new Profile(profile);
+        $body = json_decode($requestBody, true);
+        if (!isset($body['profile'])) {
+            throw new \ErrorException('Profile not found');
+        }
+        
+        return new Profile($body['profile']);
     }
 
     /**
      *
-     * @param {String} requestBody
-     * @returns {Object}
+     * @param string $requestBody
+     * @return array
      */
     public function getMetaFromRequest ($requestBody) {
-//        try {
-//            if (typeof requestBody !== 'object') {
-//                requestBody = JSON.parse(requestBody);
-//            }
-//        } catch (e) {
-//            throw new Error('Wrong stream data');
-//        }
-//        var meta = requestBody.meta;
-//        if (!meta) {
-//            throw new Error('Meta not found');
-//        }
-//        return meta;
+        $body = json_decode($requestBody, true);
+        if (!isset($body['meta'])) {
+            throw new \ErrorException('Meta not found');
+        }
+        
+        return $body['meta'];        
     }
 
     /**
      * Create empty local profile with certain id
-     * @param {String} profileId
-     * @returns {Profile}
+     * @param string $profileId
+     * @return Profile
      */
     public function createProfile ($profileId) {
-//        return new Profile({
-//            id: profileId,
-//            version: '1.0',
-//            sessions: [],
-//            attributes: [],
-//            mergedProfiles: []
-//        });
-    }
-
-    /**
-     * Check that certain object has all fields from list
-     * @param {Object} obj
-     * @param {Array} fields
-     * @returns {Error|null}
-     * @private
-     */
-    public function validateObject ($obj, $fields) {
-//        var error = null;
-//        if (typeof obj !== 'object') {
-//            error = new Error('Object is not defined');
-//        } else {
-//            try {
-//                fields = Array.isArray(fields) ? fields : [fields];
-//                fields.forEach(function (key) {
-//                    if (!(key in obj)) {
-//                        throw new Error(key.toUpperCase() + ' not found');
-//                    }
-//                });
-//            } catch (e) {
-//                error = e;
-//            }
-//        }
-//        return error;
+        return new Profile(array(
+            'id' => $profileId,
+            'version' => '1.0',
+            'sessions' => array(),
+            'attributes' => array(),
+            'mergedProfiles' => array()
+        ));
     }
 
     /**
@@ -693,224 +621,6 @@ class Helper {
         return $body['segmentEvaluation']['result'];
     }    
     
-    
-    
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    /**
-     * Parse start session data and set found environment variables
-     *
-     * <b>Example:</b>
-     *      ........
-     *      $content = $response->getContent();
-     *      try {
-     *          $data = $helper->getStreamData($content);
-     *          var_dump($data);
-     *          ------->
-     *          stdClass Object
-     *              (
-     *                  [profile]   => stdClass Object,
-     *                  [session]   => stdClass Object,
-     *                  [event]     => stdClass Object,
-     *                  [data]      => stdClass Object
-     *              )
-     *
-     *      } catch (\ErrorException $e) {
-     *          // content has not profile data
-     *      }
-     *
-     * @param string $content
-     * @return object Object with properties: profile, session, events, data
-     */
-    public function getStreamData($content) {
-        $data = $this->parseStreamData($content);
-
-        $this->setVar('profileId', $data['profile']['id']);
-        $this->setVar('collectApp', $data['session']['collectApp']);
-        $this->setVar('section', $data['session']['section']);
-
-        return $data;
-    }
-
-    /**
-     * Extract stream data from raw content.
-     * Tries to find profile and its related parts
-     *
-     * <b>Example:</b>
-     *      ........
-     *      $content = $response->getContent();
-     *      try {
-     *          $data = $helper->parseStreamData($content);
-     *          var_dump($data);
-     *          ------->
-     *          Array
-     *              (
-     *                  [profile]   => Array,
-     *                  [session]   => Array,
-     *                  [event]     => Array,
-     *                  [data]      => Array
-     *              )
-     *
-     *      } catch (\ErrorException $e) {
-     *          // content has not profile data
-     *      }
-     *
-     * @param mixed $rawData Data to parse
-     * @return object Object with properties: profile, session, events, data
-     * @throws \ErrorException If profile or some its required parts are not found exception will be thrown
-     */
-    public function parseStreamData ($rawData) {
-        $data = $rawData;
-        if (!is_object($data)) {
-            $data = json_decode($data, true);
-        }
-
-        if (!isset($data['profile'])) {
-            throw new \ErrorException('Profile not found');
-        }
-        $profile = $data['profile'];
-
-        if(!isset($profile['id'])) {
-            throw new \ErrorException('Profile id not found');
-        }
-
-        if(!isset($profile['sessions'][0])) {
-            throw new \ErrorException('Session not found');
-        }
-        $session = $profile['sessions'][0];
-
-        if(!isset($session['collectApp'])) {
-            throw new \ErrorException('CollectApp not found');
-        }
-
-        if(!isset($session['section'])) {
-            throw new \ErrorException('Section not found');
-        }
-
-        if(!isset($session['events'][0]['data'])) {
-            throw new \ErrorException('Data not set');
-        }
-
-        $result = array(
-            'profile'   => $profile,
-            'session'   => $session,
-            'event'     => $session['events'][0],
-            'data'      => $session['events'][0]['data']
-        );
-
-        return $result;
-    }
-
-
-    /**
-     * Get attributes of the profile
-     *
-     * <b>Example:</b>
-     *      [{
-     *          "collectApp" => "web",
-     *          "section"    => "sec1",
-     *          "data"       => [
-     *              "attr1" => 1,
-     *              "attr2" => 'hello'
-     *          ]
-     *      }, {
-     *          "collectApp" => "myapp",
-     *          "section"    => "mysec",
-     *          "data"       => [
-     *              "foo"   => "bar",
-     *              "hello" => "world"
-     *          ]
-     *      }]
-     *
-     * @param object|array $params Custom environment vars for retrieve attributes
-     * @return array Profile attributes
-     * @throws \ErrorException If profile not found in request response exception will be thrown
-     */
-    public function getAttributes($params = null) {
-        $params = (object)$params;
-        $vars = $this->mergeVars($this->getVars(), $params);
-
-        $url = $this->profileAppUrl(array(
-            'groupId'       => $vars->groupId,
-            'bucketName'    => $vars->bucketName,
-            'appKey'        => $vars->appKey,
-            'profileId'     => $vars->profileId
-        ));
-
-        $response = $this->request(array('url' => $url));
-
-        $body = json_decode($response, true);
-
-        if(!isset($body['profile'])) {
-            throw new \ErrorException('Profile not found');
-        }
-        $attributes = array();
-        if (!empty($body['profile']['attributes'])) {
-            $attributes = $body['profile']['attributes'];
-        }
-        return $attributes;
-    }
-
-    /**
-     * Update attributes of the profile
-     * @param object|array $attributes Key=>value pairs with attributes
-     * @param object|array $params Custom environment vars for update attributes
-     * @return bool|string String with response or false if request failed
-     */
-    public function setAttributes($attributes, $params = null) {
-        $params = (object)$params;
-        $vars = $this->mergeVars($this->getVars(), $params);
-
-        $url = $this->profileAppUrl(array(
-            'groupId'       => $vars->groupId,
-            'bucketName'    => $vars->bucketName,
-            'appKey'        => $vars->appKey,
-            'profileId'     => $vars->profileId
-        ));
-
-        $requestParams = array(
-            'url'   => $url,
-            'type'  => 'post',
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            ),
-            'body' => json_encode(array(
-                'id' => $vars->profileId,
-                'attributes' => array(array(
-                    'collectApp'    => $vars->collectApp,
-                    'section'       => $vars->section,
-                    'data'          => new \ArrayObject($attributes)
-                ))
-            ))
-        );
-
-        return $this->request($requestParams);
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
     /**
      * Checks if config is valid
      * @throws \ErrorException If config are not suitable exception will be thrown
