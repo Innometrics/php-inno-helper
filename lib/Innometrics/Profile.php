@@ -346,7 +346,7 @@ class Profile {
     /**
      * Merge data from passed profile to current
      * @param $profile
-     * @return {Profile}
+     * @return Profile
      */
     protected function merge ($profile) {
         if (!($profile instanceof Profile)) {
@@ -362,27 +362,23 @@ class Profile {
 
         $sessionsMap = array();
         foreach ($this->getSessions() as $session) {
-            $sessionsMap[session.getId()] = session;
+            $sessionsMap[$session->getId()] = $session;
         }
-//        .forEach(function (session) {
-//            
-//        });
-//
-//        profile.getSessions().forEach(function (session) {
-//            var id = session.getId();
-//            if (!sessionsMap[id]) {
-//                sessionsMap[id] = session;
-//            } else {
-//                sessionsMap[id].merge(session);
-//            }
-//        });
-//
-//        this.sessions = Object.keys(sessionsMap).map(function (id) {
-//            return sessionsMap[id];
-//        });
-//
-//        this.sortSessions();
-//        return this;
+        
+        foreach ($profile->getSessions() as $session) {
+            $sessionsMap[$session->getId()] = $session;
+            $id = $session->getId();
+            if (!isset($sessionsMap[$id])) {
+                $sessionsMap[$id] = $session;
+            } else {
+                $sessionsMap[$id]->merge($session);
+            }
+        }
+
+        $this->sessions = array_values($sessionsMap);
+
+        $this->sortSessions();
+        return $this;
     }
     
     
@@ -392,6 +388,24 @@ class Profile {
      * @return Profile
      */
     protected function initAttributes ($rawAttributesData) {
+        $this->attributes = array();
+        
+        if (is_array($rawAttributesData)) {
+            $attributes = array();
+            foreach ($rawAttributesData as $attr) {
+                if (count($attr['data'])) {
+                    $attributes[] = $this->createAttributes(
+                        isset($attr['collectApp']) ? $attr['collectApp'] : null,
+                        isset($attr['section']) ? $attr['section'] : null,
+                        isset($attr['data']) ? $attr['data'] : null
+                    );
+                }
+            }
+            
+            $this->attributes = $attributes;
+        }
+
+        return $this;
         
     }
    
@@ -401,81 +415,41 @@ class Profile {
      * @return Profile
      */
     protected function initSessions ($rawSessionsData) {
-        
+        $this->sessions = array();
+
+        if (is_array($rawSessionsData)) {
+            foreach ($rawSessionsData as $rawSessionData) {
+                $this->sessions[] = $this->createSession($rawSessionData);
+            }
+        }
+
+        return $this;
     }
 
 
-
-    /**
-     * Create attributes by initial data
-     * @param {Object} rawAttributesData
-     * @returns {Profile}
-     * @private
-     */
-//    initAttributes: function (rawAttributesData) {
-//        var attributes;
-//        this.attributes = [];
-//
-//        if (Array.isArray(rawAttributesData)) {
-//            attributes = [];
-//            rawAttributesData.forEach(function (attr) {
-//                if (Object.keys(attr.data).length){
-//                    attributes = attributes.concat(this.createAttributes(
-//                        attr.collectApp,
-//                        attr.section,
-//                        attr.data
-//                    ));
-//                }
-//            }, this);
-//            this.attributes = attributes;
-//        }
-//
-//        return this;
-//    },
-
-    /**
-     * Create session by initial data
-     * @param {Object} rawSessionsData
-     * @returns {Profile}
-     * @private
-     */
-//    initSessions: function (rawSessionsData) {
-//        this.sessions = [];
-//
-//        if (Array.isArray(rawSessionsData)) {
-//            this.sessions = rawSessionsData.map(function (rawSessionData) {
-//                return this.createSession(rawSessionData);
-//            }, this);
-//        }
-//
-//        return this;
-//    },
-
     /**
      * Replace existing session with other one
-     * @param {Session} oldSession
-     * @param {Session} newSession
-     * @returns {Profile}
-     * @private
+     * @param Session $oldSession
+     * @param Session $newSession
+     * @return Profile
      */
-//    replaceSession: function (oldSession, newSession) {
-//        var sessions = this.getSessions(),
-//            index = sessions.indexOf(oldSession);
-//
-//        if (index !== -1) {
-//            sessions[index] = newSession;
-//        }
-//
-//        return this;
-//    },
+    protected function replaceSession ($oldSession, $newSession) {
+        $sessions = $this->getSessions();
+        $index = array_search($oldSession, $sessions); // TODO: check it
+
+        if ($index !== false) {
+            $sessions[$index] = $newSession;
+        }
+
+        return $this;
+    }
 
     /**
      * Create session
-     * @param {Object} rawSessionData
-     * @returns {Session}
-     * @protected
+     * @param array $rawSessionData
+     * @return Session
      */
-//    createSession: function (rawSessionData) {
-//        return new Session(rawSessionData);
-//    }    
+    protected function createSession ($rawSessionData) {
+        return new Session($rawSessionData);
+    }    
 }
