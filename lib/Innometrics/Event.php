@@ -2,6 +2,8 @@
 
 namespace Innometrics;
 
+use Innometrics\IdGenerator;
+
 /**
  * InnoHelper TODO add description
  * @copyright 2015 Innometrics
@@ -24,7 +26,7 @@ class Event {
      * Event data object
      * @var array
      */
-    protected $data = null;
+    protected $data = array();
 
     /**
      * Date when event was created (timestamp in ms)
@@ -38,10 +40,10 @@ class Event {
     public function __construct($config = array()) {
         $now = round(microtime(true) * 1000);
             
-        $this->setId(isset($config['id']) ? $config['id'] : 'idGenerator.generate(8)'); // TODO
+        $this->setId(isset($config['id']) ? $config['id'] : IdGenerator::generate(8));
         $this->setData(isset($config['data']) ? $config['data'] : array());
         $this->setDefinitionId(isset($config['definitionId']) ? $config['definitionId'] : null);
-        $this->setCreatedAt(isset($config['createdAt']) ? $config['createdAt'] : $now);//
+        $this->setCreatedAt(isset($config['createdAt']) ? $config['createdAt'] : $now);
     }
 
     /**
@@ -57,12 +59,20 @@ class Event {
     /**
      * Set date (in ms) when event was created
      * Number or Date can be used.
-     *
-     * @param {Number|Date} $date
+     * @param double|DateTime date
      * @return Event
      */
     public function setCreatedAt ($date) {
-        $this->createdAt = +new Date($date); //TODO
+        if (!is_double($date) && !($date instanceof \DateTime)) {
+            throw new \ErrorException('Wrond date "' . $date . '". It should be an double or a DateTime instance.');
+        }
+        
+        if ($date instanceof \DateTime) {
+            $ts = $date->getTimestamp();
+            $date = $ts * 1000;
+        }        
+        
+        $this->createdAt = $date;
         return $this;
     }
 

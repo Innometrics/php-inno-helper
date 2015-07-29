@@ -3,6 +3,7 @@
 namespace Innometrics;
 
 use Innometrics\Event;
+use Innometrics\IdGenerator;
 
 /**
  * InnoHelper TODO add description
@@ -44,13 +45,13 @@ class Session {
      * Session data object
      * @var array
      */
-    protected $data = null;
+    protected $data = array();
 
     /**
      * Session events
      * @var array
      */
-    protected $events = null;
+    protected $events = array();
     
     /**
      * @param array $config equals to {id: id, section: sectionId, collectApp: collectApp, data: data, events: events, createdAt: timestamp, modifiedAt: modifiedAt }
@@ -58,7 +59,7 @@ class Session {
     public function __construct($config = array()) {
         $now = round(microtime(true) * 1000);
 
-        $this->setId(isset($config['id']) ? $config['id'] : 'idGenerator.generate(8)'); // TODO
+        $this->setId(isset($config['id']) ? $config['id'] : IdGenerator::generate(8));
         $this->setData(isset($config['data']) ? $config['data'] : array());
         $this->setCollectApp(isset($config['collectApp']) ? $config['collectApp'] : null);
         $this->setSection(isset($config['section']) ? $config['section'] : null);
@@ -100,11 +101,20 @@ class Session {
     /**
      * Set timestamp when session was created
      * Passed argument should be a number or Date instance
-     * @param {Date|Number} date
+     * @param double|DateTime date
      * @return Session
      */
     public function setCreatedAt ($date) {
-        $this->createdAt = $date; // TODO + Date|Number annotation
+        if (!is_double($date) && !($date instanceof \DateTime)) {
+            throw new \ErrorException('Wrond date "' . $date . '". It should be an double or a DateTime instance.');
+        }
+        
+        if ($date instanceof \DateTime) {
+            $ts = $date->getTimestamp();
+            $date = $ts * 1000;
+        }
+        
+        $this->createdAt = $date;
         return $this;
     }
     
@@ -219,11 +229,11 @@ class Session {
      * @return Event|null
      */
     public function getEvent ($eventId) {
-        $result = array_filter($this->getEvents(), function ($event) use ($eventId) {
+        $events = array_filter($this->getEvents(), function ($event) use ($eventId) {
             return $event->getId() === $eventId;
         });
-
-        return count($result) ? $result[0] : null;
+        $keys = array_keys($events);
+        return count($keys) ? $events[$keys[0]] : null;        
     }
 
     /**

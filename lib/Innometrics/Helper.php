@@ -558,7 +558,7 @@ class Helper {
      * @param string $profileId
      * @return Profile
      */
-    public function createProfile ($profileId) {
+    public function createProfile ($profileId = null) {
         return new Profile(array(
             'id' => $profileId,
             'version' => '1.0',

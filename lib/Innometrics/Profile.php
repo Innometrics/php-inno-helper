@@ -4,6 +4,7 @@ namespace Innometrics;
 
 use Innometrics\Attribute;
 use Innometrics\Session;
+use Innometrics\IdGenerator;
 
 /**
  * InnoHelper TODO add description
@@ -21,19 +22,19 @@ class Profile {
      * Profile attributes
      * @var array
      */
-    protected $attributes = null;
+    protected $attributes = array();
 
     /**
      * Profile sessions
      * @var array
      */
-    protected $sessions = null;
+    protected $sessions = array();
 
     /**
      * @param array $config Initial config variables
      */
     public function __construct($config = array()) {
-        $this->id = isset($config['id']) ? $config['id'] : 'TODO:idGenerator.generate(32)';
+        $this->id = isset($config['id']) && $config['id'] ? $config['id'] : IdGenerator::generate(32);
         
         $this->initAttributes(isset($config['attributes']) ? $config['attributes'] : array());
         $this->initSessions(isset($config['sessions']) ? $config['sessions'] : array());
@@ -105,29 +106,27 @@ class Profile {
      * @param string $section
      * @return array
      */
-    public function getAttributes ($collectApp, $section) {
+    public function getAttributes ($collectApp = null, $section = null) {
         $attributes = $this->attributes;
         $filters = array();
 
-//        if (collectApp) {
-//            filters.push(function (attribute) {
-//                return attribute.getCollectApp() === collectApp;
-//            });
-//        }
-//
-//        if (section) {
-//            filters.push(function (attribute) {
-//                return attribute.getSection() === section;
-//            });
-//        }
-//
-//        if (filters.length) {
-//            attributes = attributes.filter(function (attribute) {
-//                return filters.every(function (filter) {
-//                    return filter(attribute);
-//                });
-//            });
-//        }
+        if ($collectApp) {
+            $filters[] = function ($attribute) use ($collectApp) {
+                return $attribute->getCollectApp() === $collectApp;
+            };
+        }
+        
+        if ($section) {
+            $filters[] = function ($attribute) use ($section) {
+                return $attribute->getSection() === $section;
+            };
+        }
+        
+        if (count($filters)) {
+            foreach ($filters as $filter) {
+                $attributes = array_filter($attributes, $filter);            
+            }
+        }
 
         return $attributes;
     }
@@ -145,11 +144,12 @@ class Profile {
         }
         
         $attributes = $this->getAttributes($collectApp, $section);
-        $attributes = array_filter($attributes, function ($attr) {
+        $attributes = array_filter($attributes, function ($attr) use ($name) {
             return $attr->getName() === $name;
         });
         
-        return isset($attributes[0]) ? $attributes[0] : null;
+        $keys = array_keys($attributes);
+        return count($keys) ? $attributes[$keys[0]] : null;        
     }
 
     /**
@@ -158,13 +158,13 @@ class Profile {
      * @return Profile
      */
     public function setAttribute ($attribute) {
-        $this->setAttributes((array) $attribute);
+        $this->setAttributes(array($attribute));
         return $this;
     }
 
     /**
      * Add attributes to profile or update existing
-     * @param Attribute[] $newAttributes
+     * @param Attribute[]|array[] $newAttributes
      * @return Profile
      */
     public function setAttributes ($newAttributes) {
@@ -195,7 +195,7 @@ class Profile {
             );
             
             if ($foundAttr) {
-                $foundAttr->setValue($attr->getValue()); // TODO: don't work
+                $foundAttr->setValue($attr->getValue());
             } else {
                 $attributes[] = $attr;
             }
@@ -211,10 +211,10 @@ class Profile {
      * @param function $filter
      * @return array
      */
-    public function getSessions ($filter) {
+    public function getSessions ($filter = null) {
         $sessions = $this->sessions;
 
-        if (arguments.length) {
+        if ($filter) {
             if (!is_callable($filter)) {
                 throw new Error('filter should be a function');
             }
@@ -237,19 +237,18 @@ class Profile {
         if (!$session->isValid()) {
             throw new \ErrorException('Session is not valid');
         }
-
+        
         $existSession = $this->getSession($session->getId());
-
+        
         if (!$existSession) {
-            // add as new session
-            $sessions = $this->getSessions();
-            $sessions[] = $session;
-        } else if ($existSession !== $session) {
+            // add new session
+            $this->sessions[] = $session;
+        } elseif ($existSession !== $session) {
             // replace existing with new one
             $this->replaceSession($existSession, $session);
         }
 
-        return session;
+        return $session;
     }
 
     /**
@@ -261,7 +260,8 @@ class Profile {
         $sessions = array_filter($this->getSessions(), function ($session) use ($sessionId) {
             return $session->getId() === $sessionId;
         });
-        return isset($sessions[0]) ? $sessions[0] : null;
+        $keys = array_keys($sessions);
+        return count($keys) ? $sessions[$keys[0]] : null;
     }
 
     /**
@@ -273,7 +273,6 @@ class Profile {
         $lastSession = null;
 
         if (count($sessions)) {
-            // TODO: copy array before sort
             usort($sessions, function ($a, $b) {
                 return $b->getModifiedAt() - $a->getModifiedAt();
             });
@@ -389,17 +388,15 @@ class Profile {
      * @return Profile
      */
     protected function initAttributes ($rawAttributesData) {
-        $this->attributes = array();
-        
         if (is_array($rawAttributesData)) {
             $attributes = array();
             foreach ($rawAttributesData as $attr) {
                 if (count($attr['data'])) {
-                    $attributes[] = $this->createAttributes(
+                    $attributes = array_merge($attributes, $this->createAttributes(
                         isset($attr['collectApp']) ? $attr['collectApp'] : null,
                         isset($attr['section']) ? $attr['section'] : null,
                         isset($attr['data']) ? $attr['data'] : null
-                    );
+                    ));
                 }
             }
             
@@ -416,8 +413,6 @@ class Profile {
      * @return Profile
      */
     protected function initSessions ($rawSessionsData) {
-        $this->sessions = array();
-
         if (is_array($rawSessionsData)) {
             foreach ($rawSessionsData as $rawSessionData) {
                 $this->sessions[] = $this->createSession($rawSessionData);
@@ -436,10 +431,10 @@ class Profile {
      */
     protected function replaceSession ($oldSession, $newSession) {
         $sessions = $this->getSessions();
-        $index = array_search($oldSession, $sessions); // TODO: check it
+        $index = array_search($oldSession, $sessions);
 
         if ($index !== false) {
-            $sessions[$index] = $newSession;
+            $this->sessions[$index] = $newSession;
         }
 
         return $this;
