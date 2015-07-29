@@ -3,6 +3,7 @@
 namespace Innometrics;
 
 use Innometrics\Attribute;
+use Innometrics\Session;
 
 /**
  * InnoHelper TODO add description
