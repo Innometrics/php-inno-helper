@@ -58,20 +58,20 @@ class Segment {
      * @throws \ErrorException If config are not suitable exception will be thrown
      */
     protected function validateConfig ($config = array()) {
-        if (!is_array($config)) {
-            throw new \ErrorException('Config should be an array');
+        if (!is_array($config) || !count($config)) {
+            throw new \ErrorException('Config should be a non-empty array');
         }
 
         $fields = array('id', 'iql');
         foreach ($fields as $field) {
             if (!array_key_exists($field, $config)) {
-                throw new \ErrorException('Property "' . field . '" in config should be defined');
+                throw new \ErrorException('Property "' . $field . '" in config should be defined');
             }
             if (gettype($config[$field]) !== 'string') {
-                throw new \ErrorException('Property "' . field . '" in config should be a string');
+                throw new \ErrorException('Property "' . $field . '" in config should be a string');
             }
             if (!trim($config[$field])) {
-                throw new \ErrorException('Property "' . field . '" in config can not be empty');
+                throw new \ErrorException('Property "' . $field . '" in config can not be empty');
             }
         }
     }
