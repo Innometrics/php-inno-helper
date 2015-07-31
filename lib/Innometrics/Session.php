@@ -283,7 +283,7 @@ class Session {
             'section' =>    $this->getSection(),
             'collectApp' => $this->getCollectApp(),
             'data' =>       (object)$this->getData(),
-            'events' =>     (object)$this->serializeEvents(),
+            'events' =>     $this->serializeEvents(),
             'createdAt' =>  $this->getCreatedAt(),
             'modifiedAt' => $this->getModifiedAt()
         );
@@ -307,11 +307,7 @@ class Session {
      * @param Session $session
      * @return Session
      */
-    public function merge ($session) {
-        if (!($session instanceof Session)) {
-            throw new \ErrorException('Argument "session" should be a Session instance');
-        }
-
+    public function merge (Session $session) {
         if ($this->getId() !== $session->getId()) {
             throw new \ErrorException('Session IDs should be similar');
         }

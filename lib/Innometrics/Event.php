@@ -176,11 +176,7 @@ class Event {
      * @param Event $event
      * @return Event
      */
-    public function merge ($event) {
-        if (!($event instanceof Event)) {
-            throw new \ErrorException('Argument "event" should be a Event instance');
-        }
-
+    public function merge (Event $event) {
         if ($this->getId() !== $event->getId()) {
             throw new \ErrorException('Event IDs should be similar');
         }

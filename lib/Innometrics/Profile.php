@@ -283,7 +283,7 @@ class Profile {
     }
 
     /**
-     * Serialize profile to JSON
+     * Serialize profile form Profile instance to array
      * @return array
      */
     public function serialize () {
@@ -348,11 +348,7 @@ class Profile {
      * @param $profile
      * @return Profile
      */
-    public function merge ($profile) {
-        if (!($profile instanceof Profile)) {
-            throw new \ErrorException('Argument "profile" should be a Profile instance');
-        }
-
+    public function merge (Profile $profile) {
         if ($this->getId() !== $profile->getId()) {
             throw new \ErrorException('Profile IDs should be similar');
         }

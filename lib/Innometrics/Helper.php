@@ -337,11 +337,7 @@ class Helper {
      * @param Segment $segment
      * @return bool
      */
-    public function evaluateProfileBySegment ($profile, $segment) {
-        if (!($segment instanceof Segment)) {
-            throw new \ErrorException('Argument "segment" should be a Segment instance');
-        }
-        
+    public function evaluateProfileBySegment (Profile $profile, Segment $segment) {
         return $this->evaluateProfileBySegmentId($profile, $segment->getId());
     }
 
@@ -351,7 +347,7 @@ class Helper {
      * @param string $segmentId
      * @return bool
      */
-    public function evaluateProfileBySegmentId ($profile, $segmentId) {
+    public function evaluateProfileBySegmentId (Profile $profile, $segmentId) {
         return $this->_evaluateProfileByParams($profile, array(
             'segment_id' => $segmentId
         ));
@@ -418,11 +414,7 @@ class Helper {
      * @param Profile $profile
      * @return Profile
      */
-    public function saveProfile ($profile) {
-        if (!($profile instanceof Profile)) {
-            throw new \ErrorException('Argument "profile" should be a Profile instance');
-        }
-        
+    public function saveProfile (Profile $profile) {
         $profileId = $profile->getId();
         $url = $this->getProfileUrl($profileId);
         $response = $this->request(array(
@@ -447,13 +439,7 @@ class Helper {
      * @param Profile $profile2
      * @return Profile
      */
-    public function mergeProfiles ($profile1, $profile2) {
-        if (!($profile1 instanceof Profile)) {
-            throw new \ErrorException('Argument "profile1" should be a Profile instance');
-        } else if (!($profile2 instanceof Profile)) {
-            throw new \ErrorException('Argument "profile2" should be a Profile instance');
-        }
-        
+    public function mergeProfiles (Profile $profile1, Profile $profile2) {
         $profileId = $profile1->getId();
         $url = $this->getProfileUrl($profileId);
         $response = $this->request(array(
@@ -483,11 +469,7 @@ class Helper {
      * @param Profile $profile
      * @return Profile
      */
-    public function refreshLocalProfile ($profile) {
-        if (!($profile instanceof Profile)) {
-            throw new \ErrorException('Argument "profile" should be a Profile instance');
-        }
-        
+    public function refreshLocalProfile (Profile $profile) {
         $profileId = $profile->getId();
         $loadedProfile = $this->loadProfile($profileId);
         $profile->merge($loadedProfile);
@@ -573,11 +555,7 @@ class Helper {
      * @param array $params
      * @return bool
      */
-    protected function _evaluateProfileByParams ($profile, $params) {
-        if (!($profile instanceof Profile)) {
-            throw new \ErrorException('Argument "profile" should be a Profile instance');
-        }
-
+    protected function _evaluateProfileByParams (Profile $profile, $params) {
         $defParams = array(
             'profile_id' => $profile->getId()
         );
