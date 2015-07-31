@@ -375,9 +375,9 @@ class Session {
      * @return array
      */
     private function serializeEvents () {
-        return array_map($this->getEvents(), function ($event) {
+        return array_map(function ($event) {
             return $event->serialize();
-        });
+        }, $this->getEvents());
     }
     
 }

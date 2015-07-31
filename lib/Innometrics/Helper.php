@@ -211,10 +211,16 @@ class Helper {
                 break;
         }
         
-        if (!empty($params['headers'])) {
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $params['headers']);
+        $headers = array(
+            'Content-Type: application/json',
+            'Accept: application/json'
+        );
+        if (isset($params['headers']) && !empty($params['headers'])) {
+            $headers = array_merge($headers, $params['headers']);
+            $headers = array_unique($headers);
         }
         
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($curl, CURLOPT_URL, $params['url']);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($curl);
@@ -223,8 +229,14 @@ class Helper {
             $error = curl_error($curl) ? curl_error($curl) : 'Unknown error';
             throw new \ErrorException($error);
         } else {
+            $httpCode = curl_getinfo ($curl, CURLINFO_HTTP_CODE);
+            
             curl_close($curl);
-            return $response;
+            
+            return array(
+                'body'      => json_decode($response, true),
+                'httpCode'  => $httpCode
+            );
         }        
     }
     
@@ -253,16 +265,12 @@ class Helper {
     public function getAppSettings () {
         $url = $this->getAppSettingsUrl();
         $response = $this->request(array(
-            'url' => $url,
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            )
+            'url' => $url
         ));
-        $body = json_decode($response, true);
         
-        $this->checkErrors($body);
+        $this->checkErrors($response);
 
+        $body = $response['body'];
         if (!isset($body['custom'])) {
             throw new \ErrorException('Custom settings not found');
         }
@@ -286,25 +294,16 @@ class Helper {
     public function setAppSettings ($settings) {
         if (!is_array($settings)) {
             throw new \ErrorException('Settings should be an array');
-        }        
+        }
         
-        $settings = (object)$settings;
         $url = $this->getAppSettingsUrl();
-
-        $requestParams = array(
+        $response = $this->request(array(
             'url'   => $url,
             'type'  => 'put',
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            ),
-            'body' => json_encode(new \ArrayObject($settings))
-        );
-
-        $response = $this->request($requestParams);
-        $body = json_decode($response, true);
+            'body' => json_encode($settings)
+        ));
         
-        $this->checkErrors($body);
+        $this->checkErrors($response);
     }
     
     /**
@@ -314,17 +313,12 @@ class Helper {
     public function getSegments () {
         $url = $this->getSegmentsUrl();
         $response = $this->request(array(
-            'url' => $url,
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            )
+            'url' => $url
         ));
 
-        $body = json_decode($response, true);
-        
-        $this->checkErrors($body);
+        $this->checkErrors($response);
 
+        $body = $response['body'];        
         if (is_array($body)) {
             foreach ($body as $sgmData) {
                 if (isset($sgmData['segment']) && is_array($sgmData['segment'])) {
@@ -385,20 +379,12 @@ class Helper {
         }
         
         $url = $this->getProfileUrl($profileId);
-        $requestParams = array(
-            'url'   => $url,
-            'type'  => 'get',
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            )            
-        );
-
-        $response = $this->request($requestParams);
-        $body = json_decode($response, true);
+        $response = $this->request(array(
+            'url' => $url         
+        ));
+        $this->checkErrors($response); 
         
-        $this->checkErrors($body);
-        
+        $body = $response['body'];        
         $profile = new Profile($body['profile']);
         return $profile;
     }
@@ -414,19 +400,12 @@ class Helper {
         }
         
         $url = $this->getProfileUrl($profileId);
-        $requestParams = array(
+        $response = $this->request(array(
             'url'   => $url,
-            'type'  => 'delete',
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            )            
-        );
-
-        $response = $this->request($requestParams);
-        $body = json_decode($response, true);
+            'type'  => 'delete'     
+        ));
         
-        $this->checkErrors($body, 204);
+        $this->checkErrors($response, 204);
         
         return true;
     }
@@ -443,21 +422,15 @@ class Helper {
         
         $profileId = $profile->getId();
         $url = $this->getProfileUrl($profileId);
-        $requestParams = array(
-            'url'   => $url,
-            'type'  => 'post',
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            ),
+        $response = $this->request(array(
+            'url'  => $url,
+            'type' => 'post',
             'body' => json_encode($profile->serialize())
-        );   
+        ));
         
-        $response = $this->request($requestParams);
-        $body = json_decode($response, true);
+        $this->checkErrors($response, array(200, 201));     
         
-        $this->checkErrors($body, array(200, 201));     
-        
+        $body = $response['body'];
         if (isset($body['profile']) && is_array($body['profile'])) {
             $profile = new Profile($body['profile']);
         }
@@ -480,27 +453,21 @@ class Helper {
         
         $profileId = $profile1->getId();
         $url = $this->getProfileUrl($profileId);
-        $requestParams = array(
+        $response = $this->request(array(
             'url'   => $url,
             'type'  => 'post',
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            ),
             'body' => json_encode(array(
                 'id' => $profileId,
                 'mergedProfiles' => array(
                     $profile2->getId()
                 )
             ))
-        );
+        ));
         
-        $response = $this->request($requestParams);
-        $body = json_decode($response, true);
-        
-        $this->checkErrors($body, array(200, 201));     
+        $this->checkErrors($response, array(200, 201));     
         
         $profile = null;
+        $body = $response['body'];
         if (isset($body['profile']) && is_array($body['profile'])) {
             $profile = new Profile($body['profile']);
         }
@@ -575,13 +542,24 @@ class Helper {
      */
     protected function checkErrors ($response, $successCode = 200) {
         $successCode = (array)$successCode;
+        $body = $response['body'];
+        $httpCode = $response['httpCode'];
         
         if (!$response) {
             throw new \ErrorException('Empty response');
         }
         
-        if (isset($response['statusCode']) && !in_array($response['statusCode'], $successCode)) {
-            throw new \ErrorException(sprintf('Server failed with status code %s: "%s"', $response['statusCode'], $response['message']));
+        if (
+            !in_array($httpCode, $successCode) ||
+            isset($body['statusCode']) && !in_array($body['statusCode'], $successCode)
+        ) {
+            if (isset($body['statusCode'])) {
+                $msg = sprintf('Server failed with status code %s: "%s"', $body['statusCode'], $body['message']);
+            } else {
+                $msg = sprintf('Server failed with status code %s', $httpCode);
+            }
+            
+            throw new \ErrorException($msg);
         }        
     }
 
@@ -604,16 +582,12 @@ class Helper {
         $url = $this->getSegmentEvaluationUrl($params);
         
         $response = $this->request(array(
-            'url' => $url,
-            'headers' => array(
-                'Content-Type: application/json',
-                'Accept: application/json'
-            )
+            'url' => $url
         ));
-        $body = json_decode($response, true);
         
-        $this->checkErrors($body);  
+        $this->checkErrors($response);  
         
+        $body = $response['body'];
         if (!(isset($body['segmentEvaluation']) && isset($body['segmentEvaluation']['result']))) {
             throw new \ErrorExcepion('Wrong evaluation response: ' . $body);
         }
@@ -628,7 +602,7 @@ class Helper {
     protected function validateConfig ($config = array()) {
         if (!is_array($config) || !count($config)) {
             throw new \ErrorException('Config should be a non-empty array');
-        }        
+        }
 
         $fields = array('bucketName', 'appName', 'appKey', 'apiUrl');
         foreach ($fields as $field) {

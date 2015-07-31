@@ -300,7 +300,6 @@ class Profile {
      */
     protected function serializeAttributes () {
         $attributesMap = array();
-        $attributes = array();
 
         foreach ($this->getAttributes() as $attribute) {
             $collectApp = $attribute->getCollectApp();
@@ -309,17 +308,16 @@ class Profile {
 
             if (!isset($attributesMap[$key])) {
                 $attributesMap[$key] = array(
-                    'collectApp' => collectApp,
-                    'section' => section,
+                    'collectApp' => $collectApp,
+                    'section' => $section,
                     'data' => array()
                 );
-                $attributes[] = $attributesMap[$key];
             }
 
             $attributesMap[$key]['data'][$attribute->getName()] = $attribute->getValue();
         }
 
-        return $attributes;
+        return array_values($attributesMap);
     }
 
     /**
@@ -327,9 +325,9 @@ class Profile {
      * @return array
      */
     protected function serializeSessions () {
-        return array_map($this->getSessions(), function ($session) {
+        return array_map(function ($session) {
             return $session->serialize();
-        });
+        }, $this->getSessions());
     }
 
     /**
