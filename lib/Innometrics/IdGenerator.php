@@ -38,7 +38,7 @@ class IdGenerator {
             $id = $randPart . $hashPart;
         }
 
-        return substr(sha1($id), 0, $length);
+        return $id;
     }
 
     /**
@@ -78,9 +78,9 @@ class IdGenerator {
     protected static function getHashPart ($envStr) {
         $hash = '0';
         $envLgt = strlen($envStr);
-
+        
         for ($i = 0; $i < $envLgt; $i += 1) {
-            $hash .= ord($envStr[$i]);
+            $hash = (int) ($hash * 31 + ord($envStr[$i]));
         }
         
         return (string) base_convert(abs($hash), 10, 36);
@@ -99,10 +99,12 @@ class IdGenerator {
     protected static function getRandPart ($length) {
         $randPart = "";
         for ($i = 0; $i < $length; $i++) {
-            $randPart .= self::rnd(1, time()) ;
+            $rnd = self::rnd(1, 35);
+            $rnd36 = base_convert($rnd, 10, 36);
+            $randPart .= $rnd36;
         }
         
-        return base_convert($randPart, 10, 36);
+        return $randPart;
     }
 
 }
