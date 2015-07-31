@@ -30,7 +30,7 @@ class Event {
 
     /**
      * Date when event was created (timestamp in ms)
-     * @var integer
+     * @var double
      */
     protected $createdAt = null;
 
@@ -58,7 +58,7 @@ class Event {
 
     /**
      * Set date (in ms) when event was created
-     * Number or Date can be used.
+     * Double or DateTime instance can be used.
      * @param double|DateTime date
      * @return Event
      */
@@ -88,7 +88,7 @@ class Event {
 
     /**
      * Update event data with values
-     * Data is an object with key=>value pair(s).
+     * Data is an array with key=>value pair(s)
      *
      * @param array $data
      * @return Event
@@ -110,7 +110,7 @@ class Event {
     }
 
     /**
-     * get event id
+     * Get event id
      * @return string
      */
     public function getId () {
@@ -134,7 +134,7 @@ class Event {
     }
 
     /**
-     * Get event data object
+     * Get event data array
      * @return array
      */
     public function getData () {
@@ -142,9 +142,9 @@ class Event {
     }
 
     /**
-     * Get single value of event data object
+     * Get single value of event data array
      * @param string $name
-     * @return array|null
+     * @return mixed
      */
     public function getDataValue ($name) {
         return $this->data && isset($this->data[$name]) ? $this->data[$name] : null;

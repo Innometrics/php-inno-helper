@@ -57,7 +57,7 @@ class Attribute {
     /**
      * Set attribute application name
      * @param string $collectApp
-     * @returns Attribute
+     * @return Attribute
      */
     public function setCollectApp ($collectApp) {
         $this->collectApp = $collectApp;
@@ -118,7 +118,7 @@ class Attribute {
 
     /**
      * Check if attribute is valid (all required fields are present)
-     * @returns {boolean}
+     * @return bool
      */
     public function isValid () {
         $value = $this->getValue();

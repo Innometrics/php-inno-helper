@@ -31,13 +31,13 @@ class Session {
 
     /**
      * Timestamp in ms when session was created
-     * @var integer
+     * @var double
      */
     protected $createdAt = null;
 
     /**
      * Timestamp in ms when session was modified
-     * @var integer
+     * @var double
      */
     protected $modifiedAt = null;
 
@@ -90,7 +90,7 @@ class Session {
     
     /**
      * Set session section name
-     * @param string section
+     * @param string $section
      * @return Session
      */
     public function setSection ($section) {
@@ -101,7 +101,7 @@ class Session {
     /**
      * Set timestamp when session was created
      * Passed argument should be a number or Date instance
-     * @param double|DateTime date
+     * @param double|DateTime $date
      * @return Session
      */
     public function setCreatedAt ($date) {
@@ -120,7 +120,7 @@ class Session {
     
     /**
      * Update session data with values
-     * Data is an object with key=>value pair(s).
+     * Data is an array with key=>value pair(s).
      * @param array $data
      * @return Session
      */
@@ -166,7 +166,7 @@ class Session {
     
     /**
      * Get timestamp in ms when session was created
-     * @return integer
+     * @return double
      */
     public function getCreatedAt () {
         return $this->createdAt;
@@ -174,7 +174,7 @@ class Session {
     
     /**
      * Get timestamp in ms when session was modified
-     * @return integer
+     * @return double
      */
     public function getModifiedAt () {
         return $this->modifiedAt;
@@ -190,7 +190,7 @@ class Session {
     
     /**
      * Get single value from session data object
-     * @return string
+     * @return mixed
      */
     public function getDataValue ($name) {
         return $this->data && isset($this->data[$name]) ? $this->data[$name] : null;
@@ -249,9 +249,9 @@ class Session {
     }
 
     /**
-     * Get events. Can be filtered by definition id
+     * Get events. Can be filtered by definition id.
      * @param  string $eventDefinitionId
-     * @return array
+     * @return Event[]
      */
     public function getEvents ($eventDefinitionId = null) {
         $events = $this->events;
@@ -274,7 +274,7 @@ class Session {
     }
     
     /**
-     * Serialize session to JSON
+     * Serialize session from Session instance to array
      * @return array
      */
     public function serialize () {
@@ -304,7 +304,7 @@ class Session {
 
     /**
      * Merge data from passed session to current
-     * @param Session session
+     * @param Session $session
      * @return Session
      */
     public function merge ($session) {
@@ -364,7 +364,7 @@ class Session {
 
     /**
      * Create event
-     * @param array rawEventData
+     * @param array $rawEventData
      * @return Event
      */
     private function createEvent ($rawEventData) {
@@ -372,7 +372,7 @@ class Session {
     }
 
     /**
-     * Serialize events to JSON
+     * Serialize events from Event instance to array
      * @return array
      */
     private function serializeEvents () {

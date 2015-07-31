@@ -25,7 +25,7 @@ class Helper {
 
     /**
      * Company id
-     * @var mixed
+     * @var string|integer
      */
     protected $groupId = null;
 
@@ -82,7 +82,7 @@ class Helper {
 
     /**
      * Get company id
-     * @return mixed
+     * @return string|integer
      */
     public function getCompany () {
         return $this->groupId;
@@ -188,6 +188,7 @@ class Helper {
      * * $params['qs']      - array. Key=>value pairs used to create "query" part of URL
      * * $params['headers'] - array. Custom HTTP headers
      * @return string|bool string with response or false if request failed
+     * @throws \ErrorException If request was failed due to internal problems
      */
     protected static function request ($params) {
         $curl = curl_init();
@@ -298,8 +299,8 @@ class Helper {
         
         $url = $this->getAppSettingsUrl();
         $response = $this->request(array(
-            'url'   => $url,
-            'type'  => 'put',
+            'url'  => $url,
+            'type' => 'put',
             'body' => json_encode($settings)
         ));
         
@@ -369,12 +370,13 @@ class Helper {
     }
 
     /**
-     *
+     * Make Api request to load profile
      * @param string $profileId
      * @return Profile
      */
     public function loadProfile ($profileId) {
-        if (gettype(trim($profileId)) !== 'string') {
+        $profileId = trim($profileId);
+        if (empty($profileId) || gettype($profileId) !== 'string') {
             throw new \ErrorException('ProfileId should be a non-empty string');
         }
         
@@ -395,7 +397,8 @@ class Helper {
      * @return bool
      */
     public function deleteProfile ($profileId) {
-        if (gettype(trim($profileId)) !== 'string') {
+        $profileId = trim($profileId);
+        if (empty($profileId) || gettype($profileId) !== 'string') {
             throw new \ErrorException('ProfileId should be a non-empty string');
         }
         
@@ -411,7 +414,7 @@ class Helper {
     }
 
     /**
-     * Make Api request to save profile in DH
+     * Make Api request to save profile
      * @param Profile $profile
      * @return Profile
      */
@@ -440,8 +443,8 @@ class Helper {
 
     /**
      * Make Api request to merge two profiles
-     * @param Profile profile1
-     * @param Profile profile2
+     * @param Profile $profile1
+     * @param Profile $profile2
      * @return Profile
      */
     public function mergeProfiles ($profile1, $profile2) {
@@ -476,7 +479,7 @@ class Helper {
     }
 
     /**
-     * Refresh  local profile with data from DH
+     * Refresh local profile with data from DH
      * @param Profile $profile
      * @return Profile
      */
@@ -507,7 +510,7 @@ class Helper {
     }
 
     /**
-     *
+     * Try to parse meta data from request made by DH
      * @param string $requestBody
      * @return array
      */
@@ -539,6 +542,7 @@ class Helper {
      * Check for error and that response has allowed statusCode and required field(s)
      * @param array $response
      * @param integer|array $successCode
+     * @throws \ErrorException On empty response and non-successful response codes
      */
     protected function checkErrors ($response, $successCode = 200) {
         $successCode = (array)$successCode;
@@ -567,6 +571,7 @@ class Helper {
      *
      * @param Profile $profile
      * @param array $params
+     * @return bool
      */
     protected function _evaluateProfileByParams ($profile, $params) {
         if (!($profile instanceof Profile)) {

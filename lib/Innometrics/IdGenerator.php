@@ -75,7 +75,7 @@ class IdGenerator {
     /**
      * create a 32 bit hash from a String
      * @param  string $envStr String composed from environment variables
-     * @return string        String composed of [0-9a-z]
+     * @return string String composed of [0-9a-z]
      */
     protected static function getHashPart ($envStr) {
         $hash = '0';
@@ -96,7 +96,7 @@ class IdGenerator {
     /**
      *
      * @param integer $length
-     * @returns string
+     * @return string
      */
     protected static function getRandPart ($length) {
         $randPart = "";

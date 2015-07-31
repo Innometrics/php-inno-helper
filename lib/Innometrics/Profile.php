@@ -53,7 +53,7 @@ class Profile {
      * @param string $collectApp
      * @param string $section
      * @param array $attributesData
-     * @returns array
+     * @return Attribute[]
      */
     public function createAttributes ($collectApp, $section, $attributesData) {
         if (!$collectApp || !$section) {
@@ -85,10 +85,10 @@ class Profile {
 
     /**
      * Create attribute
-     * @param string collectApp
-     * @param string section
-     * @param string name
-     * @param mixed value
+     * @param string $collectApp
+     * @param string $section
+     * @param string $name
+     * @param mixed $value
      * @return Attribute
      */
     public function createAttribute ($collectApp, $section, $name, $value) {
@@ -101,10 +101,10 @@ class Profile {
     }
 
     /**
-     * Get attributes. Can be filtered by application or section
+     * Get attributes. Can be filtered by application or section.
      * @param string $collectApp
      * @param string $section
-     * @return array
+     * @return Attribute[]
      */
     public function getAttributes ($collectApp = null, $section = null) {
         $attributes = $this->attributes;
@@ -207,9 +207,9 @@ class Profile {
     }
 
     /**
-     * Get sessions. Can be filtered by passed function
+     * Get sessions. Can be filtered by passed function.
      * @param function $filter
-     * @return array
+     * @return Session[]
      */
     public function getSessions ($filter = null) {
         $sessions = $this->sessions;
@@ -295,7 +295,7 @@ class Profile {
     }
 
     /**
-     * Serialize attributes to JSON
+     * Serialize attributes from Attribute instance to array
      * @return array
      */
     protected function serializeAttributes () {
@@ -321,7 +321,7 @@ class Profile {
     }
 
     /**
-     * Serialize sessions to JSON
+     * Serialize sessions from Session instance to array
      * @return array
      */
     protected function serializeSessions () {
