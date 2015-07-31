@@ -219,6 +219,8 @@ class Session {
 
         $events = $this->getEvents();
         $events[] = $event;
+        
+        $this->events = $events;
 
         return $event;
     }
@@ -275,13 +277,13 @@ class Session {
      * Serialize session to JSON
      * @return array
      */
-    protected function serialize () {
+    public function serialize () {
         return array(
             'id' =>         $this->getId(),
             'section' =>    $this->getSection(),
             'collectApp' => $this->getCollectApp(),
-            'data' =>       $this->getData(),
-            'events' =>     $this->serializeEvents(),
+            'data' =>       (object)$this->getData(),
+            'events' =>     (object)$this->serializeEvents(),
             'createdAt' =>  $this->getCreatedAt(),
             'modifiedAt' => $this->getModifiedAt()
         );
@@ -296,7 +298,6 @@ class Session {
         usort($events, function ($event1, $event2) {
             return $event1->getCreatedAt() - $event2->getCreatedAt();
         });
-        
         $this->events = $events;
         return $this;
     }
@@ -306,12 +307,12 @@ class Session {
      * @param Session session
      * @return Session
      */
-    protected function merge ($session) {
+    public function merge ($session) {
         if (!($session instanceof Session)) {
             throw new \ErrorException('Argument "session" should be a Session instance');
         }
 
-        if ($this->getId() !== session.getId()) {
+        if ($this->getId() !== $session->getId()) {
             throw new \ErrorException('Session IDs should be similar');
         }
 

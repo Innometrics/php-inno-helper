@@ -335,9 +335,11 @@ class Profile {
      * @return Profile
      */
     protected function sortSessions () {
-        usort($this->getSessions(), function ($session1, $session2) {
-            return $session1->getModifiedAt() - $session2.getModifiedAt();
+        $sessions = $this->getSessions();
+        usort($sessions, function ($session1, $session2) {
+            return $session1->getModifiedAt() - $session2->getModifiedAt();
         });
+        $this->sessions = $sessions;
         return $this;
     }
 
@@ -346,7 +348,7 @@ class Profile {
      * @param $profile
      * @return Profile
      */
-    protected function merge ($profile) {
+    public function merge ($profile) {
         if (!($profile instanceof Profile)) {
             throw new \ErrorException('Argument "profile" should be a Profile instance');
         }

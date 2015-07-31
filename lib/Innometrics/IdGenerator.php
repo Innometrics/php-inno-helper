@@ -37,8 +37,10 @@ class IdGenerator {
         } else {
             $id = $randPart . $hashPart;
         }
+        
+        $id = $id . microtime(true);
 
-        return $id;
+        return substr(sha1($id), 0, $length);
     }
 
     /**

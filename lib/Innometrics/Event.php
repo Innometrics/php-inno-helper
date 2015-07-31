@@ -165,7 +165,7 @@ class Event {
     public function serialize () {
         return array(
             'id' =>           $this->getId(),
-            'data' =>         $this->getData(),
+            'data' =>         (object)$this->getData(),
             'definitionId' => $this->getDefinitionId(),
             'createdAt' =>    $this->getCreatedAt()
         );
@@ -177,7 +177,7 @@ class Event {
      * @return Event
      */
     public function merge ($event) {
-        if (!(event instanceof Event)) {
+        if (!($event instanceof Event)) {
             throw new \ErrorException('Argument "event" should be a Event instance');
         }
 
