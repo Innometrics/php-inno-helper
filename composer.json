@@ -9,6 +9,6 @@
         "lib-curl": "*"
     },
     "autoload": {
-        "psr-4": { "Innometrics": "lib/Innometrics" }
+        "psr-4": { "Innometrics\\": "lib/Innometrics" }
     }
 }
