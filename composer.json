@@ -8,6 +8,9 @@
         "php": ">=5.3.2",
         "lib-curl": "*"
     },
+    "require-dev": {
+        "tcz/phpunit-mockfunction": "*"
+    },
     "autoload": {
         "psr-4": { "Innometrics\\": "lib/Innometrics" }
     }

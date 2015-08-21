@@ -1,23 +1,13 @@
 <?php
 
-require_once __DIR__ . '/../lib/Innometrics/Helper.php';
+namespace Helper;
 
-use Innometrics\Helper;
+require_once('vendor/autoload.php');
 
-class HelperTest extends PHPUnit_Framework_TestCase {
-    
-    protected $config = array(
-        'bucketName' => 'bucketName',
-        'appName' => 'appName',
-        'appKey' => 'appKey',
-        'apiUrl' => 'apiUrl',
-        'groupId' => 4
-    );
-    
-    protected function createHelper ($config = array()) {
-        return new Helper($config);
-    }
-    
+require 'Base.php';
+
+class HelperTest extends Base {
+
     /**
      * @expectedException        ErrorException
      * @expectedExceptionMessage Config should be a non-empty array
@@ -139,7 +129,7 @@ class HelperTest extends PHPUnit_Framework_TestCase {
         );
         
         foreach ($configs as $config) {
-            $method = new ReflectionMethod('innometrics\Helper', $config['method']);
+            $method = new \ReflectionMethod('Innometrics\Helper', $config['method']);
             $method->setAccessible(true);
             $res = $method->invoke($helper, $config['arg']);
 
@@ -150,17 +140,4 @@ class HelperTest extends PHPUnit_Framework_TestCase {
             );
         }
     }
-    
-    public function testShouldCreateProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
-        
-        $profileId = 'profile-id';
-        $profile = $helper->createProfile($profileId);
-        
-        $this->assertSame($profile->getId(), $profileId);
-        $this->assertEquals($profile->getSessions(), array());
-        $this->assertEquals($profile->getAttributes(), array());
-    }
-    
 }

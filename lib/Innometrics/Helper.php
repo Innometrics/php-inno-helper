@@ -230,7 +230,7 @@ class Helper {
             $error = curl_error($curl) ? curl_error($curl) : 'Unknown error';
             throw new \ErrorException($error);
         } else {
-            $httpCode = curl_getinfo ($curl, CURLINFO_HTTP_CODE);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             
             curl_close($curl);
             
@@ -372,6 +372,8 @@ class Helper {
      */
     public function loadProfile ($profileId) {
         $profileId = trim($profileId);
+        $profile = null;
+        
         if (empty($profileId) || gettype($profileId) !== 'string') {
             throw new \ErrorException('ProfileId should be a non-empty string');
         }
@@ -382,8 +384,12 @@ class Helper {
         ));
         $this->checkErrors($response); 
         
-        $body = $response['body'];        
-        $profile = new Profile($body['profile']);
+        $body = $response['body'];
+        
+        if (isset($body['profile']) && is_array($body['profile'])) {
+            $profile = new Profile($body['profile']);
+        }
+        
         return $profile;
     }
 
