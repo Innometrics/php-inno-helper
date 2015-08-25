@@ -9,7 +9,8 @@
         "lib-curl": "*"
     },
     "require-dev": {
-        "tcz/phpunit-mockfunction": "*"
+        "tcz/phpunit-mockfunction": "*",
+        "mockery/mockery": "*"
     },
     "autoload": {
         "psr-4": { "Innometrics\\": "lib/Innometrics" }

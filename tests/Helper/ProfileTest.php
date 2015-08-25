@@ -466,6 +466,63 @@ class ProfileTest extends Base {
         }
     }
     
+    public function testShouldCallLoadProfileToRefreshProfile () {
+        $config = $this->config;
+        $profileId = 'profile-id';
+        
+        $helper = \Mockery::mock('Innometrics\Helper', array(
+            $config
+        ))->makePartial();
+        
+        $helper
+            ->shouldReceive('loadProfile')
+            ->with($profileId)
+            ->once()
+            ->andReturnUsing(function ($_profileId) use ($helper) {
+                return $helper->createProfile($_profileId);
+            });
+        
+        $profile = $helper->createProfile($profileId);
+        $profile = $helper->refreshLocalProfile($profile);
+        
+        $this->assertInstanceOf('Innometrics\Profile', $profile);
+        $this->assertEquals($profileId, $profile->getId());
+    }
+    
+    public function testShouldCallMergeProfileToRefreshProfile () {
+        $config = $this->config;
+        $profileId = 'profile-id111';
+        
+        $helper = \Mockery::mock('Innometrics\Helper', array(
+            $config
+        ))->makePartial();
+        
+        $helper
+            ->shouldReceive('loadProfile')
+            ->with($profileId)
+            ->once()
+            ->andReturnUsing(function ($_profileId) use ($helper) {
+                return $helper->createProfile($_profileId);
+            });
+        
+        $profile = \Mockery::mock('Innometrics\Profile', array(
+            array(
+                'id' => $profileId
+            )
+        ))->makePartial();
+        
+        $profile
+            ->shouldReceive('merge')
+            ->andReturnUsing(function ($profile) {
+                return $profile;
+            });
+        
+        $profile = $helper->refreshLocalProfile($profile);
+        
+        $this->assertInstanceOf('Innometrics\Profile', $profile);
+        $this->assertEquals($profileId, $profile->getId());
+    }
+    
     public function testShouldReturnErrorIfOccurredWhileRequestToRefreshProfile () {
         $config = $this->config;
         $profileId = 'profile-id';
