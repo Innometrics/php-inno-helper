@@ -485,30 +485,36 @@ class Helper {
 
     /**
      * Try to parse profile data from request made by DH
-     * @param string $requestBody
+     * @param string|array $requestBody
      * @return Profile
      */
     public function getProfileFromRequest ($requestBody) {
-        $body = json_decode($requestBody, true);
-        if (!isset($body['profile'])) {
+        if (!is_array($requestBody)) {
+            $requestBody = json_decode($requestBody, true);
+        }
+        
+        if (!isset($requestBody['profile'])) {
             throw new \ErrorException('Profile not found');
         }
         
-        return new Profile($body['profile']);
+        return new Profile($requestBody['profile']);
     }
 
     /**
      * Try to parse meta data from request made by DH
-     * @param string $requestBody
+     * @param string|array $requestBody
      * @return array
      */
     public function getMetaFromRequest ($requestBody) {
-        $body = json_decode($requestBody, true);
-        if (!isset($body['meta'])) {
-            throw new \ErrorException('Meta not found');
+        if (!is_array($requestBody)) {
+            $requestBody = json_decode($requestBody, true);
         }
         
-        return $body['meta'];        
+        if (!isset($requestBody['meta'])) {
+            throw new \ErrorException('Meta not found');
+        }        
+        
+        return $requestBody['meta'];        
     }
 
     /**
