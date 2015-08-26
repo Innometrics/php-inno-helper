@@ -4,7 +4,7 @@ namespace Helper;
 
 require_once('vendor/autoload.php');
 
-require 'Base.php';
+require_once 'Base.php';
 
 class HelperTest extends Base {
 

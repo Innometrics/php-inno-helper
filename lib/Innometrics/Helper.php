@@ -40,6 +40,18 @@ class Helper {
      * @var string
      */
     protected $apiUrl = null;    
+    
+    /**
+     * No cache flag
+     * @var bool
+     */
+    protected $noCache = false;
+
+    /**
+     * Cache object
+     * @var Cache object
+     */
+    protected $cache = null;
 
     /**
      * Construct Helper instance
@@ -62,6 +74,16 @@ class Helper {
         $this->bucketName = $config['bucketName'];
         $this->appName = $config['appName'];
         $this->appKey = $config['appKey'];   
+        
+        if (isset($config['noCache'])) {
+            $this->noCache = !!$config['noCache'];
+        }
+
+        if ($this->isCacheAllowed()) {
+            $this->cache = new Cache(array(
+                'cachedTime' => 600 // 10 min
+            ));
+        }        
     }
     
     /**
@@ -180,6 +202,21 @@ class Helper {
     }
     
     /**
+     * Is cache allowed?
+     * @return bool
+     */
+    protected function isCacheAllowed () {
+        return !$this->noCache;
+    }
+    
+    /**
+     * Set cache admission
+     */
+    protected function setCacheAllowed ($value) {
+        $this->noCache = !$value;
+    }
+    
+    /**
      * Internal method to make http requests, curl used
      * @param array $params List of parameters to configure request
      * * $params['url']     - string, required.
@@ -264,6 +301,17 @@ class Helper {
      * @throws \ErrorException If settings are not found exception will be thrown
      */
     public function getAppSettings () {
+        $cache = $this->cache;
+        $cacheAllowed = $this->isCacheAllowed();
+        $cacheKey = $this->getCacheKey('settings');
+
+        if ($cacheAllowed) {
+            $cachedValue = $cache->get($cacheKey);
+            if (!is_null($cachedValue)) {
+                return $cachedValue;
+            }
+        }
+        
         $url = $this->getAppSettingsUrl();
         $response = $this->request(array(
             'url' => $url
@@ -274,6 +322,10 @@ class Helper {
         $body = $response['body'];
         if (!isset($body['custom'])) {
             throw new \ErrorException('Custom settings not found');
+        }
+        
+        if ($cacheAllowed) {
+            $cache->set($cacheKey, $body['custom']);
         }
 
         return $body['custom'];
@@ -305,6 +357,12 @@ class Helper {
         ));
         
         $this->checkErrors($response);
+        
+        $cacheAllowed = $this->isCacheAllowed();
+        $cacheKey = $this->getCacheKey('settings');
+        if ($cacheAllowed) {
+            $this->cache->set($cacheKey, $settings);
+        }
     }
     
     /**
@@ -625,4 +683,13 @@ class Helper {
             throw new \ErrorException('Property "groupId" in config can not be empty');
         }
     } 
+    
+    /**
+     * Generate key for cache
+     * @param string $name
+     * @return string
+     */
+    protected function getCacheKey ($name) {
+        return ($name ?: 'default') . '-' . $this->getCollectApp();
+    }    
 }
