@@ -3,8 +3,9 @@
 namespace Helper;
 
 require_once('vendor/autoload.php');
-
 require_once 'Base.php';
+
+use Innometrics\Helper;
 
 class HelperTest extends Base {
 
@@ -13,7 +14,8 @@ class HelperTest extends Base {
      * @expectedExceptionMessage Config should be a non-empty array
      */     
     public function testShouldThrowErrorOnEmptyConfig () {
-        $this->createHelper();
+//        $this->createHelper();
+        new Helper();
     }
     
     /**
@@ -92,7 +94,7 @@ class HelperTest extends Base {
     
     public function testShouldProperlyGetConfig () {
         $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $this->assertSame($helper->getBucket(), $config['bucketName']);
         $this->assertSame($helper->getCollectApp(), $config['appName']);
@@ -102,8 +104,7 @@ class HelperTest extends Base {
     }
     
     public function testShouldGenerateUrlsCorrectly () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $configs = array(
             array(

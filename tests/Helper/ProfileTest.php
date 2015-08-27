@@ -7,8 +7,7 @@ require_once('vendor/autoload.php');
 class ProfileTest extends Base {
     
     public function testShouldCreateProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $profileId = 'profile-id';
         $profile = $helper->createProfile($profileId);
@@ -19,8 +18,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldMakePropertyRequestToLoadProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $curlConfig = array();
         
@@ -63,8 +61,7 @@ class ProfileTest extends Base {
      * TODO: loadProfile + deleteProfile
      */
     public function testShouldReturnErrorIfOccurredWhileRequestToLoadProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $httpCode = 500;
         $profileId = 'profile-id';
@@ -91,8 +88,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldReturnNullIfProfileDataCorruptedWhileRequestToLoadProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $httpCode = 200;
         $profileId = 'profile-id';
@@ -119,8 +115,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldReturnProfileWhileRequestToLoadProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $httpCode = 200;
         $profileId = 'profile-id';
@@ -143,8 +138,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldMakeProperlyRequestToDeleteProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
                 
         $curlConfig = array();
         
@@ -185,8 +179,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldNotReturnErrorIfSuccessToDeleteProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $httpCode = 204;
         $profileId = 'profile-id';
@@ -205,8 +198,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldReturnErrorIfProfileIsNotInstanceOfProfileWhileRequestToSaveProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         try {
             $helper->saveProfile(true);
@@ -216,8 +208,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldMakeProperlyRequestToSaveProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $profileId = 'profile-id';
         $profile = $helper->createProfile($profileId);        
@@ -260,8 +251,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldReturnErrorIfOccurredWhileRequestToSaveProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $httpCode = 500;
         $profileId = 'profile-id';
@@ -289,8 +279,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldReturnSameProfileIfNoDataWhileRequestToSaveProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $httpCode = 200;
         $profileId = 'profile-id';
@@ -310,8 +299,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldReturnErrorIfProfileIsNotInstanceOfProfileWhileRequestToMergeProfiles () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         $profile = $helper->createProfile('profile-id');
         
         try {
@@ -328,8 +316,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldMakeProperlyRequestToMergeProfiles () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $profileId1 = 'profile-id-1';
         $profileId2 = 'profile-id-2';
@@ -374,8 +361,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldReturnErrorIfOccurredWhileRequestToMergeProfiles () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $httpCode = 500;
         $profileId1 = 'profile-id-1';
@@ -405,8 +391,7 @@ class ProfileTest extends Base {
     }   
     
     public function testShouldReturnNullIfNoDataWhileRequestToMergeProfiles () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $httpCode = 200;
         $profileId1 = 'profile-id-1';
@@ -428,8 +413,7 @@ class ProfileTest extends Base {
     }    
     
     public function testShouldReturnProfileWhileRequestToMergeProfiles () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $httpCode = 200;
         $profileId1 = 'profile-id-1';
@@ -456,8 +440,7 @@ class ProfileTest extends Base {
     }
     
     public function testShouldReturnErrorIfProfileIsNotInstanceOfProfileWhileRequestToRefreshProfile () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         try {
             $helper->refreshLocalProfile(true);
@@ -470,7 +453,7 @@ class ProfileTest extends Base {
         $config = $this->config;
         $profileId = 'profile-id';
         
-        $helper = \Mockery::mock('Innometrics\Helper', array(
+        $helper = \Mockery::mock('Innometrics\Helper[loadProfile]', array(
             $config
         ))->makePartial();
         
@@ -480,8 +463,8 @@ class ProfileTest extends Base {
             ->once()
             ->andReturnUsing(function ($_profileId) use ($helper) {
                 return $helper->createProfile($_profileId);
-            });
-        
+            });        
+            
         $profile = $helper->createProfile($profileId);
         $profile = $helper->refreshLocalProfile($profile);
         
@@ -491,9 +474,9 @@ class ProfileTest extends Base {
     
     public function testShouldCallMergeProfileToRefreshProfile () {
         $config = $this->config;
-        $profileId = 'profile-id111';
+        $profileId = 'profile-id';
         
-        $helper = \Mockery::mock('Innometrics\Helper', array(
+        $helper = \Mockery::mock('Innometrics\Helper[loadProfile]', array(
             $config
         ))->makePartial();
         
@@ -524,12 +507,11 @@ class ProfileTest extends Base {
     }
     
     public function testShouldReturnErrorIfOccurredWhileRequestToRefreshProfile () {
-        $config = $this->config;
         $profileId = 'profile-id';
         $httpCode = 500;
         $errorMsg = 'Something is wrong there';
         
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         $profile = $helper->createProfile($profileId);
         
         $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $helper);
@@ -555,13 +537,11 @@ class ProfileTest extends Base {
      * @expectedExceptionMessage Profile not found
      */    
     public function testShouldThrowErrorOnWrongDataInProfileStream () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         $helper->getProfileFromRequest('abc');
     }
     
     public function testShouldProperlyCreateProfileFromProfileStream () {
-        $config = $this->config;
         $profileId = 'profile-id';
         $jsonBody = array(
             'profile' => array(
@@ -569,7 +549,7 @@ class ProfileTest extends Base {
             )
         );
         
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $profile1 = $helper->getProfileFromRequest($jsonBody);
         $this->assertEquals($profile1->getId(), $profileId);
@@ -583,14 +563,12 @@ class ProfileTest extends Base {
      * @expectedExceptionMessage Meta not found
      */    
     public function testShouldThrowErrorOnWrongMetaDataInProfileStream () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         $helper->getMetaFromRequest('abc');
     }
     
     public function testShouldProperlyReceiveMetaFromProfileStream () {
-        $config = $this->config;
-        $helper = $this->createHelper($config);
+        $helper = $this->createHelper();
         
         $meta = array(
             'some' => 'data',

@@ -2,6 +2,10 @@
 
 namespace Innometrics;
 
+use Illuminate\Cache\CacheManager;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Container\Container;
+ 
 /**
  * InnoHelper TODO add description
  * @copyright 2015 Innometrics
@@ -12,10 +16,10 @@ class Cache {
      * Cache storage
      * @var array
      */
-    protected $cache = array();
+    protected $cache = null;
 
     /**
-     * Cache TTL
+     * Cache TTL in seconds
      * @var integer
      */
     protected $cachedTime = 60;
@@ -32,6 +36,23 @@ class Cache {
             $cacheTime = $config['cachedTime'];
             $this->cachedTime = is_numeric($cacheTime) && $cacheTime > 0 ? $cacheTime : 60;
         }
+        
+        $app = new Container();
+        $app->singleton('files', function() {
+            return new Filesystem();
+        });
+        $app->singleton('config', function() {
+            return array(
+                'cache.default' => 'file',
+                'cache.stores.file' => array(
+                    'driver' => 'file',
+                    'path' => 'cache'
+                )
+            );
+        });
+
+        $cacheManager = new CacheManager($app);        
+        $this->cache = $cacheManager->driver();
     }
 
     /**
@@ -40,15 +61,7 @@ class Cache {
      * @return mixed
      */
     public function get ($name = '') {
-        $value = null;
-        if ($this->cachedTime && isset($this->cache[$name])) {
-            if ($this->cache[$name]['expired'] <= microtime(true)) {
-                unset($this->cache[$name]);
-            } else {
-                $value = $this->cache[$name]['value'];
-            }
-        }
-        return $value;
+        return $this->cache->get($name);
     }
 
     /**
@@ -58,12 +71,7 @@ class Cache {
      * @return undefined
      */
     public function set ($name, $value) {
-        if ($this->cachedTime) {
-            $this->cache[$name] = array(
-                'expired' => microtime(true) + ($this->cachedTime * 1000),
-                'value' => $value
-            );
-        }
+        return $this->cache->put($name, $value, $this->cachedTime / 60);
     }
 
     /**
@@ -72,9 +80,7 @@ class Cache {
      * @return undefined
      */
     public function expire ($name) {
-        if (isset($this->cache[$name])) {
-            $this->cache[$name]['expired'] = 0;
-        }
+        $this->cache->forget($name);
     }
 
     /**
@@ -82,7 +88,7 @@ class Cache {
      * @return undefined
      */
     public function clearCache () {
-        $this->cache = array();
+        $this->cache->flush();
     }
 
     /**

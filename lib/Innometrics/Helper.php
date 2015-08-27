@@ -5,6 +5,8 @@ namespace Innometrics;
 use Innometrics\Profile;
 use Innometrics\Segment;
 
+require_once('vendor/autoload.php');
+
 /**
  * InnoHelper TODO add description
  * @copyright 2015 Innometrics
@@ -205,15 +207,22 @@ class Helper {
      * Is cache allowed?
      * @return bool
      */
-    protected function isCacheAllowed () {
+    public function isCacheAllowed () {
         return !$this->noCache;
     }
     
     /**
      * Set cache admission
      */
-    protected function setCacheAllowed ($value) {
+    public function setCacheAllowed ($value) {
         $this->noCache = !$value;
+    }
+    
+    /**
+     * Clear all cache records
+     */
+    public function clearCache () {
+        $this->cache->clearCache();
     }
     
     /**
@@ -342,7 +351,7 @@ class Helper {
      *      ));
      *
      * @param object|array $settings Settings as key=>value pairs
-     * @return bool|string
+     * @return array
      */
     public function setAppSettings ($settings) {
         if (!is_array($settings)) {
@@ -358,11 +367,18 @@ class Helper {
         
         $this->checkErrors($response);
         
+        $body = $response['body'];
+        if (!isset($body['custom'])) {
+            throw new \ErrorException('Custom settings not found');
+        }
+        
         $cacheAllowed = $this->isCacheAllowed();
         $cacheKey = $this->getCacheKey('settings');
         if ($cacheAllowed) {
-            $this->cache->set($cacheKey, $settings);
+            $this->cache->set($cacheKey, $body['custom']);
         }
+        
+        return $body['custom'];
     }
     
     /**
@@ -691,5 +707,5 @@ class Helper {
      */
     protected function getCacheKey ($name) {
         return ($name ?: 'default') . '-' . $this->getCollectApp();
-    }    
+    }
 }

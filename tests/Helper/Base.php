@@ -8,6 +8,8 @@ use Innometrics\Helper;
 
 class Base extends \PHPUnit_Framework_TestCase {
     
+    protected $helper = null;
+    
     protected $config = array(
         'bucketName' => 'bucketName',
         'appName' => 'appName',
@@ -16,7 +18,17 @@ class Base extends \PHPUnit_Framework_TestCase {
         'groupId' => 4
     );
     
-    protected function createHelper ($config = array()) {
-        return new Helper($config);
+    protected function setUp() {}
+    
+    protected function tearDown() {
+        if ($this->helper) {
+            $this->helper->clearCache();
+        }
+    }
+
+    protected function createHelper ($config = null) {
+        $helper = new Helper($config ?: $this->config);
+        $this->helper = $helper;
+        return $helper;
     }
 }
