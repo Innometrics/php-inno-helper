@@ -29,7 +29,7 @@ class Cache {
      */
     public function __construct($config = array()) {
         if (!is_array($config)) {
-            throw new \ErrorException('Config should be an object');
+            throw new \ErrorException('Config should be an array');
         }
 
         if (isset($config['cachedTime'])) {
@@ -51,7 +51,7 @@ class Cache {
             );
         });
 
-        $cacheManager = new CacheManager($app);        
+        $cacheManager = new CacheManager($app);
         $this->cache = $cacheManager->driver();
     }
 

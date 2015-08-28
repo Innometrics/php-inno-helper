@@ -93,7 +93,7 @@ class Event {
      * @param array $data
      * @return Event
      */
-    public function setData ($data) {
+    public function setData (array $data) {
         $this->data = array_merge($this->data, $data);
         return $this;
     }
@@ -147,7 +147,7 @@ class Event {
      * @return mixed
      */
     public function getDataValue ($name) {
-        return $this->data && isset($this->data[$name]) ? $this->data[$name] : null;
+        return isset($this->data[$name]) ? $this->data[$name] : null;
     }
 
     /**

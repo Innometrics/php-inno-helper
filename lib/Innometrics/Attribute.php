@@ -28,7 +28,7 @@ class Attribute {
 
     /**
      * Attribute value
-     * @var string
+     * @var mixed
      */
     protected $value = null;
     
