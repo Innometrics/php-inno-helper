@@ -24,7 +24,7 @@ class CacheTest extends PHPUnit_Framework_TestCase {
         $cache->set('name1', 'value1');
         $this->assertEquals('value1', $cache->get('name1'), 'get value before forget test');
         $cache->expire('name1');
-        $this->assertEquals(NULL, $cache->get('name1'), 'get value before forget test');
+        $this->assertEquals(NULL, $cache->get('name1'), 'get value after forget test');
     }
 
 }

@@ -39,7 +39,7 @@ class Event {
      */
     public function __construct($config = array()) {
         $now = round(microtime(true) * 1000);
-            
+
         $this->setId(isset($config['id']) ? $config['id'] : IdGenerator::generate(8));
         $this->setData(isset($config['data']) ? $config['data'] : array());
         $this->setDefinitionId(isset($config['definitionId']) ? $config['definitionId'] : null);
@@ -66,12 +66,12 @@ class Event {
         if (!is_double($date) && !($date instanceof \DateTime)) {
             throw new \ErrorException('Wrond date "' . $date . '". It should be an double or a DateTime instance.');
         }
-        
+
         if ($date instanceof \DateTime) {
             $ts = $date->getTimestamp();
             $date = $ts * 1000;
-        }        
-        
+        }
+
         $this->createdAt = $date;
         return $this;
     }
