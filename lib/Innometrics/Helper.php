@@ -393,6 +393,7 @@ class Helper {
 
         $this->checkErrors($response);
 
+        $segments = array();
         $body = $response['body'];        
         if (is_array($body)) {
             foreach ($body as $sgmData) {
@@ -705,7 +706,7 @@ class Helper {
      * @param string $name
      * @return string
      */
-    protected function getCacheKey ($name) {
+    protected function getCacheKey ($name = null) {
         return ($name ?: 'default') . '-' . $this->getCollectApp();
     }
 }
