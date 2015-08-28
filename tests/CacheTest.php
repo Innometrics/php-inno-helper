@@ -12,7 +12,7 @@ class CacheTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @expectedException        ErrorException
-     * @expectedExceptionMessage Config should be an object
+     * @expectedExceptionMessage Config should be an array
      */
     public function testShouldBeReturnErrorIfMethodGenerateCallWithConfigDontArrayType () {
         $this->createCache((object)array());
