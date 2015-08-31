@@ -17,7 +17,7 @@ class Profile {
      * @var string
      */
     protected $id = null;
-    
+
     /**
      * Profile attributes
      * @var array
@@ -35,11 +35,11 @@ class Profile {
      */
     public function __construct($config = array()) {
         $this->id = isset($config['id']) && $config['id'] ? $config['id'] : IdGenerator::generate(32);
-        
+
         $this->initAttributes(isset($config['attributes']) ? $config['attributes'] : array());
         $this->initSessions(isset($config['sessions']) ? $config['sessions'] : array());
     }
-    
+
     /**
      * Get application name
      * @return string
@@ -47,7 +47,7 @@ class Profile {
     public function getId () {
         return $this->id;
     }
-    
+
     /**
      * Create attributes by application, section and data object
      * @param string $collectApp
@@ -79,7 +79,7 @@ class Profile {
                 $attributesData[$name]
             );
         }
-        
+
         return $attrs;
     }
 
@@ -115,16 +115,16 @@ class Profile {
                 return $attribute->getCollectApp() === $collectApp;
             };
         }
-        
+
         if ($section) {
             $filters[] = function ($attribute) use ($section) {
                 return $attribute->getSection() === $section;
             };
         }
-        
+
         if (count($filters)) {
             foreach ($filters as $filter) {
-                $attributes = array_filter($attributes, $filter);            
+                $attributes = array_filter($attributes, $filter);
             }
         }
 
@@ -142,17 +142,17 @@ class Profile {
         if (!$name || !$collectApp || !$section) {
             throw new \ErrorException('Name, collectApp and section should be filled to get attribute');
         }
-        
+
         $attributes = $this->getAttributes($collectApp, $section);
         $attribute = null;
-        
+
         foreach ($attributes as $attr) {
             if ($attr->getName() === $name) {
                 $attribute = $attr;
             }
         }
-        
-        return $attribute;        
+
+        return $attribute;
     }
 
     /**
@@ -176,7 +176,7 @@ class Profile {
         }
 
         $attributes = $this->getAttributes();
-        
+
         foreach ($newAttributes as $attr) {
             if (!($attr instanceof Attribute)) {
                 $attr = $this->createAttribute(
@@ -190,20 +190,20 @@ class Profile {
             if (!$attr->isValid()) {
                 throw new \ErrorException('Attribute is not valid');
             }
-            
+
             $foundAttr = $this->getAttribute(
                 $attr->getName(),
                 $attr->getCollectApp(),
                 $attr->getSection()
             );
-            
+
             if ($foundAttr) {
                 $foundAttr->setValue($attr->getValue());
             } else {
                 $attributes[] = $attr;
             }
         }
-        
+
         $this->attributes = $attributes;
 
         return $this;
@@ -240,9 +240,9 @@ class Profile {
         if (!$session->isValid()) {
             throw new \ErrorException('Session is not valid');
         }
-        
+
         $existSession = $this->getSession($session->getId());
-        
+
         if (!$existSession) {
             // add new session
             $this->sessions[] = $session;
@@ -262,14 +262,14 @@ class Profile {
     public function getSession ($sessionId) {
         $sessions = $this->getSessions();
         $session = null;
-        
+
         foreach ($sessions as $sess) {
             if ($sess->getId() === $sessionId) {
                 $session = $sess;
             }
         }
-        
-        return $attribute;         
+
+        return $session;
     }
 
     /**
@@ -279,7 +279,7 @@ class Profile {
     public function getLastSession () {
         $sessions = $this->getSessions();
         $lastSession = null;
-        
+
         foreach ($sessions as $sess) {
             if (!$lastSession || $sess->getModifiedAt() > $lastSession->getModifiedAt()) {
                 $lastSession = $sess;
@@ -314,7 +314,7 @@ class Profile {
             if ($onlyChanges && !$attribute->hasChanges()) {
                 continue;
             }
-            
+
             $collectApp = $attribute->getCollectApp();
             $section = $attribute->getSection();
             $key = $collectApp . '/' . $section;
@@ -340,15 +340,15 @@ class Profile {
      */
     protected function serializeSessions ($onlyChanges = false) {
         $sessionsMap = array();
-        
+
         foreach ($this->getSessions() as $session) {
             if ($onlyChanges && !$session->hasChanges()) {
                 continue;
             }
-            
+
             $sessionsMap[] = $session->serialize($onlyChanges);
         }
-        
+
         return $sessionsMap;
     }
 
@@ -382,7 +382,7 @@ class Profile {
         foreach ($this->getSessions() as $session) {
             $sessionsMap[$session->getId()] = $session;
         }
-        
+
         foreach ($profile->getSessions() as $session) {
             $id = $session->getId();
             if (!isset($sessionsMap[$id])) {
@@ -397,8 +397,8 @@ class Profile {
         $this->sortSessions();
         return $this;
     }
-    
-    
+
+
     /**
      * Create attributes by initial data
      * @param array $rawAttributesData
@@ -416,14 +416,14 @@ class Profile {
                     ));
                 }
             }
-            
+
             $this->attributes = $attributes;
         }
 
         return $this;
-        
+
     }
-   
+
     /**
      * Create session by initial data
      * @param array $rawSessionsData
@@ -464,8 +464,8 @@ class Profile {
      */
     protected function createSession ($rawSessionData) {
         return new Session($rawSessionData);
-    }  
-    
+    }
+
     /**
      * Mark all parts of Profile as not changed
      * (only for internal usage)
@@ -477,10 +477,10 @@ class Profile {
                 return $item->resetDirty();
             }, $items);
         };
-        
+
         $resetDirty($this->attributes);
-        $resetDirty($this->sessions);        
-        
+        $resetDirty($this->sessions);
+
         return $this;
     }
 
@@ -496,9 +496,9 @@ class Profile {
                 }
             }
 
-            return false;            
+            return false;
         };
-        
+
         return $hasChanges($this->attributes) || $hasChanges($this->sessions);
-    }    
+    }
 }
