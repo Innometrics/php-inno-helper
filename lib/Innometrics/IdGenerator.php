@@ -8,16 +8,6 @@ namespace Innometrics;
  */
 class IdGenerator {
     
-    protected static $_instance;
-    private function __construct(){}
-    private function __clone(){}
-    public static function getInstance() {
-        if (null === self::$_instance) {
-            self::$_instance = new self();
-        }
-        return self::$_instance;
-    }
-    
     public static function generate ($length = 32) {
         if (gettype($length) !== 'integer') {
             throw new \ErrorException('Length should be a number');

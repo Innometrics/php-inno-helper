@@ -144,12 +144,15 @@ class Profile {
         }
         
         $attributes = $this->getAttributes($collectApp, $section);
-        $attributes = array_filter($attributes, function ($attr) use ($name) {
-            return $attr->getName() === $name;
-        });
+        $attribute = null;
         
-        $keys = array_keys($attributes);
-        return count($keys) ? $attributes[$keys[0]] : null;        
+        foreach ($attributes as $attr) {
+            if ($attr->getName() === $name) {
+                $attribute = $attr;
+            }
+        }
+        
+        return $attribute;        
     }
 
     /**
@@ -257,11 +260,16 @@ class Profile {
      * @return Session
      */
     public function getSession ($sessionId) {
-        $sessions = array_filter($this->getSessions(), function ($session) use ($sessionId) {
-            return $session->getId() === $sessionId;
-        });
-        $keys = array_keys($sessions);
-        return count($keys) ? $sessions[$keys[0]] : null;
+        $sessions = $this->getSessions();
+        $session = null;
+        
+        foreach ($sessions as $sess) {
+            if ($sess->getId() === $sessionId) {
+                $session = $sess;
+            }
+        }
+        
+        return $attribute;         
     }
 
     /**
@@ -271,12 +279,11 @@ class Profile {
     public function getLastSession () {
         $sessions = $this->getSessions();
         $lastSession = null;
-
-        if (count($sessions)) {
-            usort($sessions, function ($a, $b) {
-                return $b->getModifiedAt() - $a->getModifiedAt();
-            });
-            $lastSession = isset($sessions[0]) ? $sessions[0] : null;
+        
+        foreach ($sessions as $sess) {
+            if (!$lastSession || $sess->getModifiedAt() > $lastSession->getModifiedAt()) {
+                $lastSession = $sess;
+            }
         }
 
         return $lastSession;
@@ -362,7 +369,6 @@ class Profile {
         }
         
         foreach ($profile->getSessions() as $session) {
-            $sessionsMap[$session->getId()] = $session;
             $id = $session->getId();
             if (!isset($sessionsMap[$id])) {
                 $sessionsMap[$id] = $session;
