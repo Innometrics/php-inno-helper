@@ -10,17 +10,12 @@ class IdGeneratorTest extends PHPUnit_Framework_TestCase {
         return IdGenerator::getInstance();
     }
 
-    public function testShouldHasMethodGenerate () {
-        $this->assertTrue(method_exists($this->createGenerator(), 'generate'));
-    }
-
     /**
      * @expectedException        ErrorException
      * @expectedExceptionMessage Length should be positive
      */
     public function testShouldBeReturnErrorIfMethodGenerateCallWithNegativeLength () {
-        $generator = $this->createGenerator();
-        $generator->generate(-1);
+        IdGenerator::generate(-1);
     }
 
     /**
@@ -28,8 +23,7 @@ class IdGeneratorTest extends PHPUnit_Framework_TestCase {
      * @expectedExceptionMessage Length should be a number
      */
     public function testShouldBeReturnErrorIfMethodGenerateCallWithDontNumberLength () {
-        $generator = $this->createGenerator();
-        $generator->generate('-1');
+        IdGenerator::generate('-1');
     }
 
 }
