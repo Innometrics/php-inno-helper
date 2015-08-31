@@ -80,17 +80,17 @@ class EventTest extends PHPUnit_Framework_TestCase {
         }
     }
 
+    /**
+     * @expectedException        ErrorException
+     * @expectedExceptionMessage Wrond date "date". It should be an double or a DateTime instance.
+     */
     public function testShouldThrowErrorOnNoValidDate () {
         $event = $this->createEvent(array(
             'definitionId' => 'name1',
             'data'         => array('name1' => 'value1')
         ));
 
-        try {
-            $event->setCreatedAt('date');
-        } catch (\Exception $e) {
-            $this->assertEquals('Wrond date "date". It should be an double or a DateTime instance.', $e->getMessage());
-        }
+        $event->setCreatedAt('date');
     }
 
     public function testShouldSupportDateTimeObjectForsetCreateAt () {
@@ -100,7 +100,7 @@ class EventTest extends PHPUnit_Framework_TestCase {
         ));
         $now = new DateTime('now');
         $event->setCreatedAt($now);
-        $this->assertEquals($now->getTimestamp()*1000, $event->getCreatedAt());
+        $this->assertEquals($now->getTimestamp() * 1000, $event->getCreatedAt());
     }
 
 }
