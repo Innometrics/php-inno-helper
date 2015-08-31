@@ -36,7 +36,7 @@ class Session {
     protected $createdAt = null;
 
     /**
-     * Timestamp in ms when session was modified
+     * Timestamp in ms when session was changed
      * @var double
      */
     protected $modifiedAt = null;
@@ -52,6 +52,18 @@ class Session {
      * @var array
      */
     protected $events = array();
+
+    /**
+     * Flag that some property was changed in session (not related to events)
+     * @var bool
+     */
+    protected $dirty = false;
+
+    /**
+     * Flag that data property was changed in session
+     * @var bool
+     */
+    protected $dataDirty = false;
     
     /**
      * @param array $config equals to {id: id, section: sectionId, collectApp: collectApp, data: data, events: events, createdAt: timestamp, modifiedAt: modifiedAt }
@@ -69,13 +81,26 @@ class Session {
     }
     
     /**
+     * Set session property and mark it as dirty
+     * @param string $field Property to be set
+     * @param mixed $value Property value
+     * @return Session
+     */
+    protected function setField ($field, $value) {
+        if ($this->{$field} !== $value) {
+            $this->{$field} = $value;
+            $this->setDirty();
+        }
+        return $this;
+    }    
+    
+    /**
      * Set session id
      * @param string $id
      * @return Session
      */
     public function setId ($id) {
-        $this->id = $id;
-        return $this;
+        return $this->setField('id', $id);
     }
     
     /**
@@ -84,8 +109,7 @@ class Session {
      * @return Session
      */
     public function setCollectApp ($collectApp) {
-        $this->collectApp = $collectApp;
-        return $this;
+        return $this->setField('collectApp', $collectApp);
     }
     
     /**
@@ -94,8 +118,7 @@ class Session {
      * @return Session
      */
     public function setSection ($section) {
-        $this->section = $section;
-        return $this;
+        return $this->setField('section', $section);
     }
     
     /**
@@ -114,8 +137,7 @@ class Session {
             $date = $ts * 1000;
         }
         
-        $this->createdAt = $date;
-        return $this;
+        return $this->setField('createdAt', $date);
     }
     
     /**
@@ -125,8 +147,7 @@ class Session {
      * @return Session
      */
     public function setData ($data) {
-        $this->data = array_merge($this->data, $data);
-        return $this;
+        return $this->setField('data', array_merge($this->data, $data));
     }
     
     /**
@@ -137,6 +158,7 @@ class Session {
      */
     public function setDataValue ($name, $value) {
         $this->data[$name] = $value;
+        $this->setDirty();
         return $this;
     }
     
@@ -173,7 +195,7 @@ class Session {
     }
     
     /**
-     * Get timestamp in ms when session was modified
+     * Get timestamp in ms when session was changed
      * @return double
      */
     public function getModifiedAt () {
@@ -221,6 +243,8 @@ class Session {
         $events[] = $event;
         
         $this->events = $events;
+        
+        $this->setDirty();
 
         return $event;
     }
@@ -266,7 +290,7 @@ class Session {
     }
     
     /**
-     *
+     * TODO: json-schema validation
      * @return bool
      */
     public function isValid () {
@@ -275,15 +299,23 @@ class Session {
     
     /**
      * Serialize session from Session instance to array
+     * @param bool $onlyChanges
      * @return array
      */
-    public function serialize () {
+    public function serialize ($onlyChanges = false) {
+        $events = $this->serializeEvents($onlyChanges);
+
+        $data = array();
+        if (!$onlyChanges || $this->hasDataChanges()) {
+            $data = $this->getData();
+        }        
+        
         return array(
             'id' =>         $this->getId(),
             'section' =>    $this->getSection(),
             'collectApp' => $this->getCollectApp(),
-            'data' =>       (object)$this->getData(),
-            'events' =>     $this->serializeEvents(),
+            'data' =>       (object)$data,
+            'events' =>     $events,
             'createdAt' =>  $this->getCreatedAt(),
             'modifiedAt' => $this->getModifiedAt()
         );
@@ -312,7 +344,7 @@ class Session {
             throw new \ErrorException('Session IDs should be similar');
         }
 
-        // update last modified date
+        // update last changed date
         if ($session->modifiedAt > $this->modifiedAt) {
             $this->modifiedAt = $session->modifiedAt;
         }
@@ -338,6 +370,7 @@ class Session {
         $this->events = array_values($eventsMap);
 
         $this->sortEvents();
+        $this->setDirty();
         return $this;
     }
 
@@ -369,12 +402,84 @@ class Session {
 
     /**
      * Serialize events from Event instance to array
+     * @param bool $onlyChanges
      * @return array
      */
-    private function serializeEvents () {
-        return array_map(function ($event) {
-            return $event->serialize();
-        }, $this->getEvents());
+    private function serializeEvents ($onlyChanges = false) {
+        $eventsMap = array();
+        
+        foreach ($this->getEvents() as $event) {
+            if ($onlyChanges && !$event->hasChanges()) {
+                continue;
+            }
+            
+            $eventsMap[] = $event->serialize();
+        }
+        
+        return $eventsMap;        
+    }
+    
+    /**
+     * Mark attribute as "dirty"
+     * @return Session
+     */
+    protected function setDirty () {
+        $this->dirty = true;
+        return $this;
+    }
+    
+    /**
+     * Resets "dirty" status
+     * @return Session
+     */
+    protected function resetDirty () {
+        $this->dirty = false;
+        $this->dataDirty = false;
+        
+        foreach ($this->getEvents() as $event) {
+            $event->resetDirty();
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Mark session data as "dirty"
+     * @return Session
+     */
+    protected function setDataDirty () {
+        $this->dataDirty = true;
+        return $this;
+    }
+
+    /**
+     * Check if session has any changes
+     * @return bool
+     */
+    public function hasChanges () {
+        return !!$this->dirty || $this->hasDataChanges() || $this->hasEventsChanges();
+    }
+    
+    /**
+     * Check if session has changes in data property
+     * @return bool
+     */
+    public function hasDataChanges () {
+        return !!$this->dataDirty;
+    }
+
+    /**
+     * Check if some of events has changes
+     * @return bool
+     */
+    protected function hasEventsChanges () {
+        foreach ($this->getEvents() as $event) {
+            if ($event->hasChanges()) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
 }

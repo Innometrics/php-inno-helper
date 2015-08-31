@@ -291,24 +291,30 @@ class Profile {
 
     /**
      * Serialize profile form Profile instance to array
+     * @param bool $onlyChanges
      * @return array
      */
-    public function serialize () {
+    public function serialize ($onlyChanges = false) {
         return array(
             'id' =>         $this->getId(),
-            'attributes' => $this->serializeAttributes(),
-            'sessions' =>   $this->serializeSessions()
+            'attributes' => $this->serializeAttributes($onlyChanges),
+            'sessions' =>   $this->serializeSessions($onlyChanges)
         );
     }
 
     /**
      * Serialize attributes from Attribute instance to array
+     * @param bool $onlyChanges
      * @return array
      */
-    protected function serializeAttributes () {
+    protected function serializeAttributes ($onlyChanges = false) {
         $attributesMap = array();
 
         foreach ($this->getAttributes() as $attribute) {
+            if ($onlyChanges && !$attribute->hasChanges()) {
+                continue;
+            }
+            
             $collectApp = $attribute->getCollectApp();
             $section = $attribute->getSection();
             $key = $collectApp . '/' . $section;
@@ -329,12 +335,21 @@ class Profile {
 
     /**
      * Serialize sessions from Session instance to array
+     * @param bool $onlyChanges
      * @return array
      */
-    protected function serializeSessions () {
-        return array_map(function ($session) {
-            return $session->serialize();
-        }, $this->getSessions());
+    protected function serializeSessions ($onlyChanges = false) {
+        $sessionsMap = array();
+        
+        foreach ($this->getSessions() as $session) {
+            if ($onlyChanges && !$session->hasChanges()) {
+                continue;
+            }
+            
+            $sessionsMap[] = $session->serialize($onlyChanges);
+        }
+        
+        return $sessionsMap;
     }
 
     /**
@@ -449,5 +464,41 @@ class Profile {
      */
     protected function createSession ($rawSessionData) {
         return new Session($rawSessionData);
+    }  
+    
+    /**
+     * Mark all parts of Profile as not changed
+     * (only for internal usage)
+     * @return Profile
+     */
+    public function resetDirty () {
+        $resetDirty = function ($items) {
+            array_map(function ($item) {
+                return $item->resetDirty();
+            }, $items);
+        };
+        
+        $resetDirty($this->attributes);
+        $resetDirty($this->sessions);        
+        
+        return $this;
+    }
+
+    /**
+     * Check if some of attribute or session has changes
+     * @return bool
+     */
+    public function hasChanges () {
+        $hasChanges = function ($items) {
+            foreach ($items as $item) {
+                if ($item->hasChanges()) {
+                    return true;
+                }
+            }
+
+            return false;            
+        };
+        
+        return $hasChanges($this->attributes) || $hasChanges($this->sessions);
     }    
 }
