@@ -463,6 +463,7 @@ class Helper {
         
         if (isset($body['profile']) && is_array($body['profile'])) {
             $profile = new Profile($body['profile']);
+            $profile->resetDirty();
         }
         
         return $profile;
@@ -491,6 +492,7 @@ class Helper {
     }
 
     /**
+     * TODO: json-schema validation before saving
      * Make Api request to save profile
      * @param Profile $profile
      * @return Profile
@@ -501,7 +503,7 @@ class Helper {
         $response = $this->request(array(
             'url'  => $url,
             'type' => 'post',
-            'body' => json_encode($profile->serialize())
+            'body' => json_encode($profile->serialize(true))
         ));
         
         $this->checkErrors($response, array(200, 201));     
@@ -509,6 +511,7 @@ class Helper {
         $body = $response['body'];
         if (isset($body['profile']) && is_array($body['profile'])) {
             $profile = new Profile($body['profile']);
+            $profile->resetDirty();
         }
         
         return $profile;
@@ -540,6 +543,7 @@ class Helper {
         $body = $response['body'];
         if (isset($body['profile']) && is_array($body['profile'])) {
             $profile = new Profile($body['profile']);
+            $profile->resetDirty();
         }
         
         return $profile;        

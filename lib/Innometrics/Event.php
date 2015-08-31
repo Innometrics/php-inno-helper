@@ -33,6 +33,12 @@ class Event {
      * @var double
      */
     protected $createdAt = null;
+    
+    /**
+     * Flag that something was changed in event
+     * @var bool
+     */
+    protected $dirty = false;
 
     /**
      * @param array $config equals to {id: id, definitionId: definitionId, data: data, createdAt: timestamp}
@@ -45,6 +51,20 @@ class Event {
         $this->setDefinitionId(isset($config['definitionId']) ? $config['definitionId'] : null);
         $this->setCreatedAt(isset($config['createdAt']) ? $config['createdAt'] : $now);
     }
+    
+    /**
+     * Set event property and mark it as dirty
+     * @param string $field Property to be set
+     * @param mixed $value Property value
+     * @return Event
+     */
+    protected function setField ($field, $value) {
+        if ($this->{$field} !== $value) {
+            $this->{$field} = $value;
+            $this->setDirty();
+        }
+        return $this;
+    }    
 
     /**
      * Set event id
@@ -52,8 +72,7 @@ class Event {
      * @return Event
      */
     public function setId ($id) {
-        $this->id = $id;
-        return $this;
+        return $this->setField('id', $id);
     }
 
     /**
@@ -72,8 +91,7 @@ class Event {
             $date = $ts * 1000;
         }
 
-        $this->createdAt = $date;
-        return $this;
+        return $this->setField('createdAt', $date);
     }
 
     /**
@@ -82,8 +100,7 @@ class Event {
      * @return Event
      */
     public function setDefinitionId ($definitionId) {
-        $this->definitionId = $definitionId;
-        return $this;
+        return $this->setField('definitionId', $definitionId);
     }
 
     /**
@@ -94,8 +111,7 @@ class Event {
      * @return Event
      */
     public function setData (array $data) {
-        $this->data = array_merge($this->data, $data);
-        return $this;
+        return $this->setField('data', array_merge($this->data, $data));
     }
 
     /**
@@ -106,6 +122,7 @@ class Event {
      */
     public function setDataValue ($name, $value) {
         $this->data[$name] = $value;
+        $this->setDirty();
         return $this;
     }
 
@@ -151,6 +168,7 @@ class Event {
     }
 
     /**
+     * TODO: json-schema validation
      * Check if event is valid (all required fields are present)
      * @return bool
      */
@@ -185,4 +203,30 @@ class Event {
 
         return $this;
     }
+    
+    /**
+     * Mark event as "dirty"
+     * @return Event
+     */
+    protected function setDirty () {
+        $this->dirty = true;
+        return $this;
+    }
+    
+    /**
+     * Resets "dirty" status
+     * @return Event
+     */
+    protected function resetDirty () {
+        $this->dirty = false;
+        return $this;
+    }
+
+    /**
+     * Check if event has any changes
+     * @return bool
+     */
+    public function hasChanges () {
+        return !!$this->dirty;
+    }      
 }
