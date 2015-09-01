@@ -97,16 +97,16 @@ class SessionTest extends PHPUnit_Framework_TestCase {
             'modifiedAt' => $now
         ));
 
-        $this->assertEquals(array(
+        $this->assertEquals((object) array(
             'id' => 'sid1',
             'collectApp' => 'collectApp1',
             'section' => 'section1',
             'data' => (object)array('name1' => 'value1'),
             'events' => array(
-                array(
+                (object) array(
                     'id' => 'eid1',
                     'definitionId' => 'name1',
-                    'data' => (object)array('name1' => 'value1'),
+                    'data' => (object) array('name1' => 'value1'),
                     'createdAt' => $now
                 )
             ),
@@ -139,15 +139,15 @@ class SessionTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($session->getDataValue('name2'), 'value2');
 
         $event = $session->getEvent('eid1');
-        $this->assertEquals(array(
+        $this->assertEquals((object) array(
             'id' => 'eid1',
             'definitionId' => 'name1',
-            'data' => (object)array('name1' => 'value1'),
+            'data' => (object) array('name1' => 'value1'),
             'createdAt' => $now
         ), $event->serialize());
 
         $event = $session->getLastEvent();
-        $this->assertEquals(array(
+        $this->assertEquals((object) array(
             'id' => 'eid1',
             'definitionId' => 'name1',
             'data' => (object)array('name1' => 'value1'),

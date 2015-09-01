@@ -173,7 +173,7 @@ class Event {
      * @return bool
      */
     public function isValid () {
-        return !!($this->getId() && $this->getDefinitionId() && $this->getData() && $this->getCreatedAt());
+        return Validator::isEventValid($this->serialize()) && !!($this->getId() && $this->getDefinitionId() && $this->getData() && $this->getCreatedAt());
     }
 
     /**
@@ -181,9 +181,9 @@ class Event {
      * @return array
      */
     public function serialize () {
-        return array(
+        return (object) array(
             'id' =>           $this->getId(),
-            'data' =>         (object)$this->getData(),
+            'data' =>         (object) $this->getData(),
             'definitionId' => $this->getDefinitionId(),
             'createdAt' =>    $this->getCreatedAt()
         );
@@ -217,7 +217,7 @@ class Event {
      * Resets "dirty" status
      * @return Event
      */
-    protected function resetDirty () {
+    public function resetDirty () {
         $this->dirty = false;
         return $this;
     }

@@ -1,0 +1,27 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "version": {
+            "type": "string"
+        },
+        "createdAt": {
+            "type": "number"
+        },
+        "sessions": {
+            "$ref": "sessions.json"
+        },
+        "attributes": {
+            "$ref": "attributes.json"
+        },
+        "mergedProfiles": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": ["id", "sessions", "attributes"]
+}

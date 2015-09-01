@@ -1,0 +1,19 @@
+{
+    "id": "attribute",
+    "type": "object",
+    "properties": {
+        "collectApp": {
+            "type": "string"
+        },
+        "section": {
+            "type": "string"
+        },
+        "data": {
+            "type": "object"
+        },
+        "modifiedAt": {
+            "type": "number"
+        }
+    },
+    "required": ["collectApp", "section", "data"]
+}

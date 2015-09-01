@@ -498,12 +498,18 @@ class Helper {
      * @return Profile
      */
     public function saveProfile (Profile $profile) {
+        $profileData = $profile->serialize(true);
+        
+        if (!Validator::isProfileValid($profileData)) {
+            throw new \ErrorException('Profile is not valid');
+        }        
+        
         $profileId = $profile->getId();
         $url = $this->getProfileUrl($profileId);
         $response = $this->request(array(
             'url'  => $url,
             'type' => 'post',
-            'body' => json_encode($profile->serialize(true))
+            'body' => json_encode($profileData)
         ));
         
         $this->checkErrors($response, array(200, 201));     

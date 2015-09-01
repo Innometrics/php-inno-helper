@@ -38,10 +38,10 @@ class EventTest extends PHPUnit_Framework_TestCase {
             'createdAt'    => $now
         ));
 
-        $this->assertEquals(array(
+        $this->assertEquals((object) array(
             'id'           => 'eid',
             'definitionId' => 'name1',
-            'data'         => (object)array('name1' => 'value1'),
+            'data'         => (object) array('name1' => 'value1'),
             'createdAt'    => $now
         ), $event->serialize(), 'serialize test');
     }
@@ -65,10 +65,10 @@ class EventTest extends PHPUnit_Framework_TestCase {
 
         $event1->merge($event2);
 
-        $this->assertEquals(array(
+        $this->assertEquals((object) array(
             'id'           => 'eid1',
             'definitionId' => 'name1',
-            'data'         => (object)array('name1' => 'value1', 'name2' => 'value2'),
+            'data'         => (object) array('name1' => 'value1', 'name2' => 'value2'),
             'createdAt'    => $now
         ), $event1->serialize(), 'merge test');
 

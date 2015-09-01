@@ -9,7 +9,9 @@
         "lib-curl": "*",
         "illuminate/container": "*",
         "illuminate/filesystem": "*",
-        "illuminate/cache": "*"
+        "illuminate/cache": "*",
+        "justinrainbow/json-schema": "*",
+        "hasbridge/json-schema-validator": "*"
     },
     "require-dev": {
         "tcz/phpunit-mockfunction": "*",
