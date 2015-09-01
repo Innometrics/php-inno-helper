@@ -269,7 +269,7 @@ class Profile {
             }
         }
         
-        return $attribute;         
+        return $session;         
     }
 
     /**
@@ -295,7 +295,7 @@ class Profile {
      * @return array
      */
     public function serialize ($onlyChanges = false) {
-        return array(
+        return (object) array(
             'id' =>         $this->getId(),
             'attributes' => $this->serializeAttributes($onlyChanges),
             'sessions' =>   $this->serializeSessions($onlyChanges)
@@ -320,14 +320,14 @@ class Profile {
             $key = $collectApp . '/' . $section;
 
             if (!isset($attributesMap[$key])) {
-                $attributesMap[$key] = array(
+                $attributesMap[$key] = (object) array(
                     'collectApp' => $collectApp,
                     'section' => $section,
-                    'data' => array()
+                    'data' => (object) array()
                 );
             }
 
-            $attributesMap[$key]['data'][$attribute->getName()] = $attribute->getValue();
+            $attributesMap[$key]->data->{$attribute->getName()} = $attribute->getValue();
         }
 
         return array_values($attributesMap);

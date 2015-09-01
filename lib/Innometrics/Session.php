@@ -294,7 +294,7 @@ class Session {
      * @return bool
      */
     public function isValid () {
-        return !!$this->getId() && !!$this->getSection() && !!$this->getCollectApp() && !!$this->getCreatedAt();
+        return Validator::isSessionValid($this->serialize()) && !!$this->getId() && !!$this->getSection() && !!$this->getCollectApp() && !!$this->getCreatedAt();
     }
     
     /**
@@ -308,13 +308,13 @@ class Session {
         $data = array();
         if (!$onlyChanges || $this->hasDataChanges()) {
             $data = $this->getData();
-        }        
+        }
         
-        return array(
+        return (object) array(
             'id' =>         $this->getId(),
             'section' =>    $this->getSection(),
             'collectApp' => $this->getCollectApp(),
-            'data' =>       (object)$data,
+            'data' =>       (object) $data,
             'events' =>     $events,
             'createdAt' =>  $this->getCreatedAt(),
             'modifiedAt' => $this->getModifiedAt()
@@ -432,7 +432,7 @@ class Session {
      * Resets "dirty" status
      * @return Session
      */
-    protected function resetDirty () {
+    public function resetDirty () {
         $this->dirty = false;
         $this->dataDirty = false;
         

@@ -142,7 +142,7 @@ class Attribute {
      */
     public function isValid () {
         $value = $this->getValue();
-        return !!($this->getName() && $this->getCollectApp() && $this->getSection() && $value !== null);
+        return Validator::isAttributeValid($this->serialize()) && !!($this->getName() && $this->getCollectApp() && $this->getSection() && $value !== null);
     }
     
     /**
@@ -158,7 +158,7 @@ class Attribute {
      * Resets "dirty" status
      * @return Attribute
      */
-    protected function resetDirty () {
+    public function resetDirty () {
         $this->dirty = false;
         return $this;
     }
@@ -169,5 +169,20 @@ class Attribute {
      */
     public function hasChanges () {
         return !!$this->dirty;
-    }    
+    }
+    
+    /**
+     * Convert attribute to JSON
+     * @return array
+     */
+    public function serialize () {
+        $data = array();
+        $data[$this->getName()] = $this->getValue();
+        
+        return (object) array(
+            'collectApp' => $this->getCollectApp(),
+            'section' =>    $this->getSection(),
+            'data' =>       (object) $data
+        );
+    }
 }
