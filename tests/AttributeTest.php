@@ -20,6 +20,16 @@ class AttributeTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue($attribute->isValid());
     }
 
+    public function testShouldBeInvalidOnInvalid () {
+        $attribute = $this->createAttribute(array(
+            'collectApp' => 'collectApp1',
+            'section'    => 'section1',
+            'name'       => 'name1',
+            'value'      => null
+        ));
+        $this->assertFalse($attribute->isValid());
+    }
+
     public function testShouldReceiveProperties () {
         $attribute = $this->createAttribute(array(
             'collectApp' => 'collectApp1',

@@ -492,7 +492,6 @@ class Helper {
     }
 
     /**
-     * TODO: json-schema validation before saving
      * Make Api request to save profile
      * @param Profile $profile
      * @return Profile

@@ -290,11 +290,12 @@ class Session {
     }
     
     /**
-     * TODO: json-schema validation
+     * Check if session is valid (all required fields are present)
      * @return bool
      */
     public function isValid () {
-        return Validator::isSessionValid($this->serialize()) && !!$this->getId() && !!$this->getSection() && !!$this->getCollectApp() && !!$this->getCreatedAt();
+        return Validator::isSessionValid($this->serialize()) && 
+            !!$this->getId() && !!$this->getSection() && !!$this->getCollectApp() && !!$this->getCreatedAt();
     }
     
     /**

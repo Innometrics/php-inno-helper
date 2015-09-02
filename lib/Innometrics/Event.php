@@ -168,12 +168,12 @@ class Event {
     }
 
     /**
-     * TODO: json-schema validation
      * Check if event is valid (all required fields are present)
      * @return bool
      */
     public function isValid () {
-        return Validator::isEventValid($this->serialize()) && !!($this->getId() && $this->getDefinitionId() && $this->getData() && $this->getCreatedAt());
+        return Validator::isEventValid($this->serialize()) && 
+            !!($this->getId() && $this->getDefinitionId() && $this->getData() && $this->getCreatedAt());
     }
 
     /**

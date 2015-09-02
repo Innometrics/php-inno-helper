@@ -136,13 +136,13 @@ class Attribute {
     }
 
     /**
-     * TODO: json-schema validation
      * Check if attribute is valid (all required fields are present)
      * @return bool
      */
     public function isValid () {
         $value = $this->getValue();
-        return Validator::isAttributeValid($this->serialize()) && !!($this->getName() && $this->getCollectApp() && $this->getSection() && $value !== null);
+        return Validator::isAttributeValid($this->serialize()) && 
+            !!($this->getName() && $this->getCollectApp() && $this->getSection() && $value !== null);
     }
     
     /**
