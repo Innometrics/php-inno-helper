@@ -103,6 +103,24 @@ class HelperTest extends Base {
         $this->assertSame($helper->getCompany(), $config['groupId']);
     }
     
+    public function testShouldProperlySetThatCacheIsAllowed () {
+        $config1 = $this->config;
+        $helper1 = $this->createHelper($config1);
+        $this->assertTrue($helper1->isCacheAllowed());
+        
+        $config2 = array_merge($this->config, array(
+            'noCache' => true
+        ));
+        $helper2 = $this->createHelper($config2);
+        $this->assertFalse($helper2->isCacheAllowed());
+        
+        $config3 = array_merge($this->config, array(
+            'noCache' => false
+        ));
+        $helper3 = $this->createHelper($config3);
+        $this->assertTrue($helper3->isCacheAllowed());
+    }
+    
     public function testShouldGenerateUrlsCorrectly () {
         $helper = $this->createHelper();
         

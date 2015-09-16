@@ -15,6 +15,7 @@ class ProfileTest extends Base {
         $this->assertSame($profile->getId(), $profileId);
         $this->assertEquals($profile->getSessions(), array());
         $this->assertEquals($profile->getAttributes(), array());
+        $this->assertFalse($profile->hasChanges());
     }
     
     public function testShouldMakePropertyRequestToLoadProfile () {
@@ -57,10 +58,7 @@ class ProfileTest extends Base {
         );
     }
     
-    /**
-     * TODO: loadProfile + deleteProfile
-     */
-    public function testShouldReturnErrorIfOccurredWhileRequestToLoadProfile () {
+    public function testShouldReturnErrorIfOccurredWhileRequestToLoadOrDeleteProfile () {
         $helper = $this->createHelper();
         
         $httpCode = 500;
@@ -68,23 +66,25 @@ class ProfileTest extends Base {
         $errorMsg = 'Something is wrong there';
         
         $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $helper);
-        $curlExecMock->expects($this->once())
+        $curlExecMock->expects($this->any())
             ->will($this->returnValue(json_encode(array(
                 'statusCode' => $httpCode,
                 'message' => $errorMsg
             )))); 
         
         $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $helper);
-        $curlGetinfoMock->expects($this->once())
+        $curlGetinfoMock->expects($this->any())
             ->will($this->returnValue($httpCode)); 
         
-        try {
-            $helper->loadProfile($profileId);
-        } catch (\Exception $ex) {
-            $errMsg = sprintf('Server failed with status code %d: "%s"', $httpCode, $errorMsg);
-            
-            $this->assertEquals($errMsg, $ex->getMessage());
-        }        
+        foreach (array('loadProfile', 'deleteProfile') as $func) {
+            try {
+                $helper->{$func}($profileId);
+            } catch (\Exception $ex) {
+                $errMsg = sprintf('Server failed with status code %d: "%s"', $httpCode, $errorMsg);
+
+                $this->assertEquals($errMsg, $ex->getMessage());
+            }        
+        }
     }
     
     public function testShouldReturnNullIfProfileDataCorruptedWhileRequestToLoadProfile () {
@@ -298,6 +298,33 @@ class ProfileTest extends Base {
         $this->assertSame($profile, $savedProfile);
     }
     
+    public function testShouldReturnProfileReceivedAfterSaveProfile () {
+        $helper = $this->createHelper();
+        
+        $httpCode = 200;
+        $profileId = 'profile-id';
+        $profile = $helper->createProfile($profileId);
+        
+        $savedProfileId = 'saved-profile-id';
+        
+        $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $helper);
+        $curlExecMock->expects($this->once())
+            ->will($this->returnValue(json_encode(array(
+                'profile' => array(
+                    'id' => $savedProfileId
+                )
+            ))));
+        
+        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $helper);
+        $curlGetinfoMock->expects($this->once())
+            ->will($this->returnValue($httpCode)); 
+        
+        $savedProfile = $helper->saveProfile($profile);
+        
+        $this->assertSame($savedProfile->getId(), $savedProfileId);
+        $this->assertFalse($savedProfile->hasChanges());
+    }
+    
     public function testShouldReturnErrorIfProfileIsNotInstanceOfProfileWhileRequestToMergeProfiles () {
         $helper = $this->createHelper();
         $profile = $helper->createProfile('profile-id');
@@ -437,6 +464,7 @@ class ProfileTest extends Base {
         
         $this->assertInstanceOf('Innometrics\Profile', $savedProfile);
         $this->assertEquals($profileId1, $savedProfile->getId());
+        $this->assertFalse($savedProfile->hasChanges());
     }
     
     public function testShouldReturnErrorIfProfileIsNotInstanceOfProfileWhileRequestToRefreshProfile () {
