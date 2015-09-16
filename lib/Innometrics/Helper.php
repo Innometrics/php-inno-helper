@@ -398,7 +398,9 @@ class Helper {
         if (is_array($body)) {
             foreach ($body as $sgmData) {
                 if (isset($sgmData['segment']) && is_array($sgmData['segment'])) {
-                    $segments[] = new Segment($sgmData['segment']);
+                    try {
+                        $segments[] = new Segment($sgmData['segment']);
+                    } catch (\ErrorException $ex) {}
                 }
             }
         }
@@ -652,6 +654,7 @@ class Helper {
      * @return bool
      */
     protected function _evaluateProfileByParams (Profile $profile, $params) {
+        $result = null;
         $defParams = array(
             'profile_id' => $profile->getId()
         );
@@ -667,11 +670,11 @@ class Helper {
         $this->checkErrors($response);  
         
         $body = $response['body'];
-        if (!(isset($body['segmentEvaluation']) && isset($body['segmentEvaluation']['result']))) {
-            throw new \ErrorExcepion('Wrong evaluation response: ' . $body);
+        if (isset($body['segmentEvaluation']) && isset($body['segmentEvaluation']['result'])) {
+            $result = $body['segmentEvaluation']['result'];
         }
         
-        return $body['segmentEvaluation']['result'];
+        return $result;
     }    
     
     /**

@@ -203,7 +203,7 @@ class ProfileTest extends Base {
         try {
             $helper->saveProfile(true);
         } catch (\Exception $e) {
-            $this->stringStartsWith('Argument 1 passed to Innometrics\Helper::saveProfile() must be an instance of Innometrics\Profile', $e->getMessage());
+            $this->assertStringStartsWith('Argument 1 passed to Innometrics\Helper::saveProfile() must be an instance of Innometrics\Profile', $e->getMessage());
         }
     }
     
@@ -332,13 +332,13 @@ class ProfileTest extends Base {
         try {
             $helper->mergeProfiles(true, $profile);
         } catch (\Exception $e) {
-            $this->stringStartsWith('Argument 1 passed to Innometrics\Helper::mergeProfiles() must be an instance of Innometrics\Profile', $e->getMessage());
+            $this->assertStringStartsWith('Argument 1 passed to Innometrics\Helper::mergeProfiles() must be an instance of Innometrics\Profile', $e->getMessage());
         }
         
         try {
             $helper->mergeProfiles($profile, array());
         } catch (\Exception $e) {
-            $this->stringStartsWith('Argument 2 passed to Innometrics\Helper::mergeProfiles() must be an instance of Innometrics\Profile', $e->getMessage());
+            $this->assertStringStartsWith('Argument 2 passed to Innometrics\Helper::mergeProfiles() must be an instance of Innometrics\Profile', $e->getMessage());
         }
     }
     
@@ -473,7 +473,7 @@ class ProfileTest extends Base {
         try {
             $helper->refreshLocalProfile(true);
         } catch (\Exception $e) {
-            $this->stringStartsWith('Argument 1 passed to Innometrics\Helper::refreshLocalProfile() must be an instance of Innometrics\Profile', $e->getMessage());
+            $this->assertStringStartsWith('Argument 1 passed to Innometrics\Helper::refreshLocalProfile() must be an instance of Innometrics\Profile', $e->getMessage());
         }
     }
     
@@ -556,7 +556,7 @@ class ProfileTest extends Base {
         try {
             $helper->refreshLocalProfile($profile);
         } catch (\Exception $e) {
-            $this->stringStartsWith('Server failed with status code 500: "' . $errorMsg . '"', $e->getMessage());
+            $this->assertStringStartsWith('Server failed with status code 500: "' . $errorMsg . '"', $e->getMessage());
         }
     }
     
