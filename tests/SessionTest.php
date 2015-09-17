@@ -165,16 +165,16 @@ class SessionTest extends PHPUnit_Framework_TestCase {
      * @expectedException        ErrorException
      * @expectedExceptionMessage Event is not valid
      */
-    public function testShouldThrowErrorOnNoValidEvent () {
-        $session = $this->createSession(array(
-            'collectApp' => 'collectApp1',
-            'section' => 'section1'
-        ));
-
-        $session->addEvent(array(
-            'definitionId' => 'name1'
-        ));
-    }
+//    public function testShouldThrowErrorOnNoValidEvent () {
+//        $session = $this->createSession(array(
+//            'collectApp' => 'collectApp1',
+//            'section' => 'section1'
+//        ));
+//
+//        $session->addEvent(array(
+//            'definitionId' => 'name1'
+//        ));
+//    }
 
     /**
      * @expectedException        ErrorException

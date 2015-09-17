@@ -173,7 +173,7 @@ class Event {
      */
     public function isValid () {
         return Validator::isEventValid($this->serialize()) && 
-            !!($this->getId() && $this->getDefinitionId() && $this->getData() && $this->getCreatedAt());
+            !!($this->getId() && $this->getDefinitionId() && is_array($this->getData()) && $this->getCreatedAt());
     }
 
     /**

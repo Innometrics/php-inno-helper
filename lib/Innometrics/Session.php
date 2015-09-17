@@ -158,7 +158,7 @@ class Session {
      */
     public function setDataValue ($name, $value) {
         $this->data[$name] = $value;
-        $this->setDirty();
+        $this->setDataDirty();
         return $this;
     }
     
