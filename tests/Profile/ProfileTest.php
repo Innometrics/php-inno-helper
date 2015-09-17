@@ -1,16 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../lib/Innometrics/Profile.php';
+namespace Profile;
 
-use Innometrics\Profile;
+require_once('vendor/autoload.php');
 
-class ProfileTest extends PHPUnit_Framework_TestCase {
-
-    protected function createProfile ($config = array()) {
-        return new Profile($config);
-    }
-
-    public function testShouldBeRetirnSomeData () {
+class ProfileTest extends Base {
+    
+    public function testShouldReturnSomeData () {
         $profile = $this->createProfile(array(
             'id' => 'pid',
             'attributes' => array(
@@ -66,6 +62,11 @@ class ProfileTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(count($sessions), 1);
         $session = $profile->getSession('sid');
         $this->assertEquals($session->getDataValue('name1'), 'value1');
+    }    
+    
+    public function testShouldNotThrowErrorOnEmptyConfig () {
+        $this->assertInstanceOf('Innometrics\Profile', $this->createProfile());
+        $this->assertInstanceOf('Innometrics\Profile', $this->createProfile(array()));
     }
-
+    
 }
