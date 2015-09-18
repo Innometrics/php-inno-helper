@@ -175,8 +175,6 @@ class Profile {
             throw new \ErrorException('Argument "attributes" should be an array');
         }
 
-        $attributes = $this->getAttributes();
-
         foreach ($newAttributes as $attr) {
             if (!($attr instanceof Attribute)) {
                 $attr = $this->createAttribute(
@@ -200,11 +198,9 @@ class Profile {
             if ($foundAttr) {
                 $foundAttr->setValue($attr->getValue());
             } else {
-                $attributes[] = $attr;
+                $this->attributes[] = $attr;
             }
         }
-
-        $this->attributes = $attributes;
 
         return $this;
     }
