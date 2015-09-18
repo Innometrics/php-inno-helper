@@ -5,6 +5,7 @@ namespace Innometrics;
 use Innometrics\Attribute;
 use Innometrics\Session;
 use Innometrics\IdGenerator;
+use League\Flysystem\Exception;
 
 /**
  * InnoHelper TODO add description
@@ -215,7 +216,7 @@ class Profile {
 
         if ($filter) {
             if (!is_callable($filter)) {
-                throw new Error('filter should be a function');
+                throw new \ErrorException('filter should be a function');
             }
             $sessions = array_filter($sessions, $filter);
         }
