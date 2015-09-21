@@ -75,14 +75,23 @@ class AttributesTest extends Base {
         $profile = $this->createProfile();
         $profile->createAttributes('app', null, array());
     }
+
+    /**
+     * @expectedException        ErrorException
+     * @expectedExceptionMessage attributes are empty
+     */
+    public function testShouldThrowErrorIfNoAttributes () {
+        $profile = $this->createProfile();
+        $profile->createAttributes('app', 'sec', array());
+    }
     
     public function testShouldThrowErrorOnWrongData () {
         $profile = $this->createProfile();
-        foreach (array(null, true, array()) as $value) {
+        foreach (array(null, true) as $value) {
             try {
                 $profile->createAttributes('app', 'section', $value);
             } catch (\ErrorException $ex) {
-                $this->assertEquals($ex->getMessage(), 'attributes should be an array');
+                $this->assertEquals('attributes should be an array', $ex->getMessage());
             }
         }
     }

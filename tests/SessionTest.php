@@ -165,16 +165,17 @@ class SessionTest extends PHPUnit_Framework_TestCase {
      * @expectedException        ErrorException
      * @expectedExceptionMessage Event is not valid
      */
-//    public function testShouldThrowErrorOnNoValidEvent () {
-//        $session = $this->createSession(array(
-//            'collectApp' => 'collectApp1',
-//            'section' => 'section1'
-//        ));
-//
-//        $session->addEvent(array(
-//            'definitionId' => 'name1'
-//        ));
-//    }
+    public function testShouldThrowErrorOnNoValidEvent () {
+        $session = $this->createSession(array(
+            'collectApp' => 'collectApp1',
+            'section' => 'section1'
+        ));
+
+        $session->addEvent(array(
+            'id' => 'eId',
+            'definitionId' => false
+        ));
+    }
 
     /**
      * @expectedException        ErrorException
@@ -222,6 +223,28 @@ class SessionTest extends PHPUnit_Framework_TestCase {
         $now = new DateTime('now');
         $session->setCreatedAt($now);
         $this->assertEquals($now->getTimestamp() * 1000, $session->getCreatedAt());
+    }
+
+    public function testShouldBeMarkedAsDirtyAfterCreation () {
+        $session = $this->createSession();
+        $this->assertTrue($session->hasChanges());
+    }
+
+    public function testShouldBeMarkerAsNotDirty () {
+        $session = $this->createSession();
+        $session->resetDirty();
+        $this->assertFalse($session->hasChanges());
+    }
+
+    public function testShouldBeMarkerAsDirtyIfAnyEventIsDirty () {
+        $session = $this->createSession();
+        $session->addEvent(array(
+            'definitionId'=> 'ed1'
+        ));
+        $session->resetDirty();
+        $this->assertFalse($session->hasChanges());
+        $session->getLastEvent()->setDataValue('a', 'b');
+        $this->assertTrue($session->hasChanges());
     }
 
 }

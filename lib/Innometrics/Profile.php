@@ -61,7 +61,7 @@ class Profile {
             throw new \ErrorException('collectApp and section should be filled to create attribute correctly');
         }
 
-        if (!$attributesData || !is_array($attributesData)) {
+        if (!is_array($attributesData)) {
             throw new \ErrorException('attributes should be an array');
         }
 

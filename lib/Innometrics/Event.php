@@ -172,7 +172,7 @@ class Event {
      * @return bool
      */
     public function isValid () {
-        return Validator::isEventValid($this->serialize()) && 
+        return Validator::isEventValid($this->serialize()) &&
             !!($this->getId() && $this->getDefinitionId() && is_array($this->getData()) && $this->getCreatedAt());
     }
 
