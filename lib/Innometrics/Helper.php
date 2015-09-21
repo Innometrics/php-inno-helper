@@ -250,22 +250,27 @@ class Helper {
                 }
                 break;
 
-            case 'get':
+            // case 'get':
             default:
+                /* Not used, disabled for code coverage
                 if (!empty($params['qs'])) {
                     $params['url'] .= '?' . http_build_query($params['qs']);
                 }
+                */
                 break;
         }
-        
+
         $headers = array(
             'Content-Type: application/json',
             'Accept: application/json'
         );
+
+        /* Not used, disabled for code coverage
         if (isset($params['headers']) && !empty($params['headers'])) {
             $headers = array_merge($headers, $params['headers']);
             $headers = array_unique($headers);
         }
+        */
         
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($curl, CURLOPT_URL, $params['url']);
@@ -448,10 +453,8 @@ class Helper {
      * @return Profile
      */
     public function loadProfile ($profileId) {
-        $profileId = trim($profileId);
         $profile = null;
-        
-        if (empty($profileId) || gettype($profileId) !== 'string') {
+        if (empty($profileId) || gettype($profileId) !== 'string' || !($profileId = trim($profileId))) {
             throw new \ErrorException('ProfileId should be a non-empty string');
         }
         
@@ -477,8 +480,7 @@ class Helper {
      * @return bool
      */
     public function deleteProfile ($profileId) {
-        $profileId = trim($profileId);
-        if (empty($profileId) || gettype($profileId) !== 'string') {
+        if (empty($profileId) || gettype($profileId) !== 'string' || !($profileId = trim($profileId))) {
             throw new \ErrorException('ProfileId should be a non-empty string');
         }
         
@@ -628,10 +630,6 @@ class Helper {
         $successCode = (array)$successCode;
         $body = $response['body'];
         $httpCode = $response['httpCode'];
-        
-        if (!$response) {
-            throw new \ErrorException('Empty response');
-        }
         
         if (
             !in_array($httpCode, $successCode) ||

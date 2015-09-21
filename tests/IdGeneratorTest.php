@@ -6,10 +6,6 @@ use Innometrics\IdGenerator;
 
 class IdGeneratorTest extends PHPUnit_Framework_TestCase {
 
-    protected function createGenerator () {
-        return IdGenerator::getInstance();
-    }
-
     /**
      * @expectedException        ErrorException
      * @expectedExceptionMessage Length should be positive
@@ -24,6 +20,18 @@ class IdGeneratorTest extends PHPUnit_Framework_TestCase {
      */
     public function testShouldBeReturnErrorIfMethodGenerateCallWithDontNumberLength () {
         IdGenerator::generate('-1');
+    }
+
+    public function testShouldGenerateIdWithDefaultLength () {
+        $defaultLength = 32;
+        $id = IdGenerator::generate();
+        $this->assertEquals(strlen($id), $defaultLength);
+    }
+
+    public function testShouldGenerateIdWithDefinedLength () {
+        $length = 100;
+        $id = IdGenerator::generate($length);
+        $this->assertEquals(strlen($id), $length);
     }
 
 }
