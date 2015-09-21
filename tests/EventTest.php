@@ -171,13 +171,6 @@ class EventTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testShouldBeMarkedAsDirtyIfDataValueChanged () {
-        $setters = array(
-            'setId' => '1',
-            'setDefinitionId' => '2',
-            'setCreatedAt' => microtime(true) * 1000,
-            'setData' => array('a' => 'b')
-
-        );
         $event = $this->createEvent([
             'definitionId' => 'did'
         ]);
