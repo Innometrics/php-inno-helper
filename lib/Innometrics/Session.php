@@ -284,6 +284,7 @@ class Session {
             $events = array_filter($events, function ($event) use ($eventDefinitionId) {
                 return $event->getDefinitionId() === $eventDefinitionId;
             });
+            $events = array_values($events);
         }
 
         return $events;
