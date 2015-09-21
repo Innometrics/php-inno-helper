@@ -129,9 +129,73 @@ class SessionsTest extends Base {
         $profile->getSessions([]);
     }
 
-    
+    public function testShouldReturnAllSessionsIfNoFilterFunction () {
+        $profile = $this->createProfile();
+        $sessions = $profile->getSessions();
+        $this->assertEquals(count($sessions), 0);
 
+        $profile->setSession([
+            'id'        => 'sid1',
+            'collectApp'=> 'app1',
+            'section'   => 'sec1'
+        ]);
+        $profile->setSession([
+            'id'        => 'sid2',
+            'collectApp'=> 'app2',
+            'section'   => 'sec2'
+        ]);
 
+        $sessions = $profile->getSessions();
+        $this->assertEquals(count($sessions), 2);
+    }
+
+    public function testShouldReturnOnlyFilteredSessions () {
+        $profile = $this->createProfile();
+        $profile->setSession([
+            'id'        => 'sid1',
+            'collectApp'=> 'app1',
+            'section'   => 'sec1'
+        ]);
+        $profile->setSession([
+            'id'        => 'sid2',
+            'collectApp'=> 'app2',
+            'section'   => 'sec2'
+        ]);
+
+        $sessions = $profile->getSessions(function ($session) {
+            return $session->getCollectApp() === 'app2';
+        });
+        $this->assertEquals(count($sessions), 1);
+
+        $session = $sessions[0];
+        $this->assertEquals($session->getId(), 'sid2');
+        $this->assertEquals($session->getCollectApp(), 'app2');
+        $this->assertEquals($session->getSection(), 'sec2');
+    }
+
+    public function testShouldReturnNullIfNoLastSession () {
+        $profile = $this->createProfile();
+        $this->assertEquals($profile->getLastSession(), null);
+    }
+
+    public function testShouldReturnLastSession () {
+        $profile = $this->createProfile();
+        $profile->setSession([
+            'id'        => 'sid1',
+            'collectApp'=> 'app1',
+            'section'   => 'sec1',
+            'modifiedAt' => 100
+        ]);
+        $profile->setSession([
+            'id'        => 'sid2',
+            'collectApp'=> 'app2',
+            'section'   => 'sec2',
+            'modifiedAt' => 50
+        ]);
+
+        $session = $profile->getLastSession();
+        $this->assertEquals($session->getId(), 'sid1');
+    }
 
 }
 

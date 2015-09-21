@@ -126,6 +126,7 @@ class Profile {
         if (count($filters)) {
             foreach ($filters as $filter) {
                 $attributes = array_filter($attributes, $filter);
+                $attributes = array_values($attributes);
             }
         }
 
@@ -219,6 +220,7 @@ class Profile {
                 throw new \ErrorException('filter should be a function');
             }
             $sessions = array_filter($sessions, $filter);
+            $sessions = array_values($sessions);
         }
 
         return $sessions;
