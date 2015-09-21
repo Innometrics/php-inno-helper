@@ -29,16 +29,16 @@ class AttributesTest extends Base {
         $this->assertCount(2, $attributes);
         
         $attribute = $attributes[0];
-        $this->assertEquals($attribute->getCollectApp(), 'app');
-        $this->assertEquals($attribute->getSection(), 'sec');
-        $this->assertEquals($attribute->getName(), 'test');
-        $this->assertEquals($attribute->getValue(), 1);
+        $this->assertEquals('app', $attribute->getCollectApp());
+        $this->assertEquals('sec', $attribute->getSection());
+        $this->assertEquals('test', $attribute->getName());
+        $this->assertEquals(1, $attribute->getValue());
         
         $attribute = $attributes[1];
-        $this->assertEquals($attribute->getCollectApp(), 'app');
-        $this->assertEquals($attribute->getSection(), 'sec');
-        $this->assertEquals($attribute->getName(), 'foo');
-        $this->assertEquals($attribute->getValue(), 'bar');
+        $this->assertEquals('app', $attribute->getCollectApp());
+        $this->assertEquals('sec', $attribute->getSection());
+        $this->assertEquals('foo', $attribute->getName());
+        $this->assertEquals('bar', $attribute->getValue());
     }
     
     public function testShouldNotCreateAttributeFromConfigIfItHasNoData () {
@@ -116,7 +116,7 @@ class AttributesTest extends Base {
             try {
                 $profile->setAttributes($value);
             } catch (\ErrorException $ex) {
-                $this->assertEquals($ex->getMessage(), 'Argument "attributes" should be an array');
+                $this->assertEquals('Argument "attributes" should be an array', $ex->getMessage());
             }
         }
     }
@@ -156,7 +156,7 @@ class AttributesTest extends Base {
         $this->assertCount(2, $profile->getAttributes());
         
         $attribute = $profile->getAttribute($attribute1['name'], $attribute1['collectApp'], $attribute1['section']);
-        $this->assertEquals($attribute->getValue(), $attribute1['value']);
+        $this->assertEquals($attribute1['value'], $attribute->getValue());
         
         $attribute = $profile->getAttribute($attribute2->getName(), $attribute2->getCollectApp(), $attribute2->getSection());
         $this->assertEquals($attribute->getValue(), $attribute2->getValue());
@@ -184,7 +184,7 @@ class AttributesTest extends Base {
         $this->assertCount(1, $profile->getAttributes());
         
         $attribute = $profile->getAttribute($attribute1['name'], $attribute1['collectApp'], $attribute1['section']);
-        $this->assertEquals($attribute->getValue(), $attribute2['value']);
+        $this->assertEquals($attribute2['value'], $attribute->getValue());
     }
     
     public function testShouldDelegateSetAttributeToSetAttributes () {
@@ -240,6 +240,6 @@ class AttributesTest extends Base {
         $attribute = $profile->getAttribute($attributeData['name'], $attributeData['collectApp'], $attributeData['section']);
         
         $this->assertInstanceOf('Innometrics\Attribute', $attribute);
-        $this->assertEquals($attribute->getValue(), $attributeData['value']);
+        $this->assertEquals($attributeData['value'], $attribute->getValue());
     }
 }

@@ -25,13 +25,13 @@ class IdGeneratorTest extends PHPUnit_Framework_TestCase {
     public function testShouldGenerateIdWithDefaultLength () {
         $defaultLength = 32;
         $id = IdGenerator::generate();
-        $this->assertEquals(strlen($id), $defaultLength);
+        $this->assertEquals($defaultLength, strlen($id));
     }
 
     public function testShouldGenerateIdWithDefinedLength () {
         $length = 100;
         $id = IdGenerator::generate($length);
-        $this->assertEquals(strlen($id), $length);
+        $this->assertEquals($length, strlen($id));
     }
 
 }

@@ -96,11 +96,11 @@ class HelperTest extends Base {
         $config = $this->config;
         $helper = $this->createHelper();
         
-        $this->assertSame($helper->getBucket(), $config['bucketName']);
-        $this->assertSame($helper->getCollectApp(), $config['appName']);
-        $this->assertSame($helper->getAppKey(), $config['appKey']);
-        $this->assertSame($helper->getApiHost(), $config['apiUrl']);
-        $this->assertSame($helper->getCompany(), $config['groupId']);
+        $this->assertSame($config['bucketName'], $helper->getBucket());
+        $this->assertSame($config['appName'], $helper->getCollectApp());
+        $this->assertSame($config['appKey'], $helper->getAppKey());
+        $this->assertSame($config['apiUrl'], $helper->getApiHost());
+        $this->assertSame($config['groupId'], $helper->getCompany());
     }
     
     public function testShouldProperlySetThatCacheIsAllowed () {
@@ -153,8 +153,8 @@ class HelperTest extends Base {
             $res = $method->invoke($helper, $config['arg']);
 
             $this->assertSame(
-                $res,
                 $config['res'],
+                $res,
                 'should return ' . $config['method']
             );
         }

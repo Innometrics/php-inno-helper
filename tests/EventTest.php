@@ -117,7 +117,7 @@ class EventTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @expectedException        ErrorException
-     * @expectedExceptionMessage Wrond date "date". It should be an double or a DateTime instance.
+     * @expectedExceptionMessage Wrong date "date". It should be an double or a DateTime instance.
      */
     public function testShouldThrowErrorOnNoValidDate () {
         $event = $this->createEvent(array(
@@ -171,13 +171,6 @@ class EventTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testShouldBeMarkedAsDirtyIfDataValueChanged () {
-        $setters = array(
-            'setId' => '1',
-            'setDefinitionId' => '2',
-            'setCreatedAt' => microtime(true) * 1000,
-            'setData' => array('a' => 'b')
-
-        );
         $event = $this->createEvent([
             'definitionId' => 'did'
         ]);

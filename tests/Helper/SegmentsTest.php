@@ -119,7 +119,7 @@ class SegmentsTest extends Base {
             $segments = $helper->getSegments();
             
             $this->assertTrue(is_array($segments));
-            $this->assertEquals(count($segments), $body['count']);
+            $this->assertEquals($body['count'], count($segments));
             
             foreach ($segments as $sgm) {
                 $this->assertInstanceOf('Innometrics\Segment', $sgm);
@@ -331,7 +331,7 @@ class SegmentsTest extends Base {
                 'segment_id' => '1'
             )); 
             
-            $this->assertEquals($res, $body['result']);
+            $this->assertEquals($body['result'], $res);
         }
     } 
     
