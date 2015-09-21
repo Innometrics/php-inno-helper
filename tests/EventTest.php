@@ -10,6 +10,41 @@ class EventTest extends PHPUnit_Framework_TestCase {
         return new Event($config);
     }
 
+    public function testShouldNotThrowErrorWhenCreateWithEmptyData () {
+        $ok = false;
+        try {
+            $this->createEvent();
+            $ok = true;
+        } catch (\Exception $e) {
+
+        }
+        $this->assertTrue($ok);
+    }
+
+    public function testShouldGenerateOnlySomePropsByDefault () {
+        $event = $this->createEvent();
+        $this->assertStringMatchesFormat("%s", $event->getId());
+        $this->assertInternalType('double', $event->getCreatedAt());
+        $this->assertInternalType('array', $event->getData());
+        $this->assertEmpty($event->getDefinitionId());
+        $this->assertFalse($event->isValid());
+    }
+
+    public function testShouldBeInvalidIfSomeRequiredPropertyIsEmpty () {
+        $setters = array(
+            'setId', 'setDefinitionId'
+        );
+
+        foreach ($setters as $setter) {
+            $event = $this->createEvent([
+                'definitionId' => 'did'
+            ]);
+            $this->assertTrue($event->isValid());
+            $event->$setter(null);
+            $this->assertFalse($event->isValid());
+        }
+    }
+
     public function testShouldNotThrowErrorOnIsValid () {
         $event = $this->createEvent(array(
             'definitionId' => 'name1',
@@ -102,5 +137,58 @@ class EventTest extends PHPUnit_Framework_TestCase {
         $event->setCreatedAt($now);
         $this->assertEquals($now->getTimestamp() * 1000, $event->getCreatedAt());
     }
+
+    public function testShouldBeDirtyAfterCreation () {
+        $event = $this->createEvent();
+        $this->assertTrue($event->hasChanges());
+    }
+
+    public function testShouldNoBeDirtyIfReset () {
+        $event = $this->createEvent();
+        $this->assertTrue($event->hasChanges());
+        $event->resetDirty();
+        $this->assertFalse($event->hasChanges());
+    }
+
+    public function testShouldBeMarkedAsDirtyIfSomePropertyWasChanged () {
+        $setters = array(
+            'setId' => '1',
+            'setDefinitionId' => '2',
+            'setCreatedAt' => microtime(true) * 1000,
+            'setData' => array('a' => 'b')
+
+        );
+        $event = $this->createEvent([
+            'definitionId' => 'did'
+        ]);
+
+        foreach ($setters as $setter => $arg) {
+            $event->resetDirty();
+            $this->assertFalse($event->hasChanges());
+            $event->$setter($arg);
+            $this->assertTrue($event->hasChanges());
+        }
+    }
+
+    public function testShouldBeMarkedAsDirtyIfDataValueChanged () {
+        $setters = array(
+            'setId' => '1',
+            'setDefinitionId' => '2',
+            'setCreatedAt' => microtime(true) * 1000,
+            'setData' => array('a' => 'b')
+
+        );
+        $event = $this->createEvent([
+            'definitionId' => 'did'
+        ]);
+
+        $event->resetDirty();
+        $this->assertFalse($event->hasChanges());
+        $event->setDataValue('a', 'b');
+        $this->assertTrue($event->hasChanges());
+    }
+
+
+
 
 }

@@ -82,8 +82,11 @@ class Event {
      * @return Event
      */
     public function setCreatedAt ($date) {
+        if (is_numeric($date) && !$this->isTimestampWithMilliseconds($date)) {
+            throw new \ErrorException('Timestamp should be in milliseconds');
+        }
         if (!is_double($date) && !($date instanceof \DateTime)) {
-            throw new \ErrorException('Wrond date "' . $date . '". It should be an double or a DateTime instance.');
+            throw new \ErrorException('Wrong date "' . $date . '". It should be an double or a DateTime instance.');
         }
 
         if ($date instanceof \DateTime) {
@@ -92,6 +95,12 @@ class Event {
         }
 
         return $this->setField('createdAt', $date);
+    }
+
+    protected function isTimestampWithMilliseconds ($ts) {
+        $tsLength = strval($ts);
+        $nowLength = strval(microtime(true));
+        return $tsLength >= $nowLength;
     }
 
     /**
