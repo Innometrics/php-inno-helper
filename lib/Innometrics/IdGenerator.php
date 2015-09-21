@@ -16,8 +16,6 @@ class IdGenerator {
             throw new \ErrorException('Length should be positive');
         }
 
-        $id = '';
-        
         $hashPart = self::getHashPart(self::getEnvStr(self::getEnvObj()));
         $randPart = self::getRandPart($length - strlen($hashPart));
 
@@ -28,9 +26,14 @@ class IdGenerator {
             $id = $randPart . $hashPart;
         }
         
-        $id = $id . microtime(true);
+        $result = '';
 
-        return substr(sha1($id), 0, $length);
+        do {
+            $result .= sha1($id . microtime(true));
+        }
+        while (strlen($result) < $length);
+
+        return substr($result, 0, $length);
     }
 
     /**
