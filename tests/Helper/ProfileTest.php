@@ -57,8 +57,34 @@ class ProfileTest extends Base {
             $curlReferenceConfig
         );
     }
-    
+
     public function testShouldReturnErrorIfOccurredWhileRequestToLoadOrDeleteProfile () {
+        $helper = $this->createHelper();
+
+        $httpCode = 500;
+        $profileId = 'profile-id';
+        $errorMsg = 'Something is wrong there';
+
+        $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $helper);
+        $curlExecMock->expects($this->any())
+            ->will($this->returnValue(json_encode(array())));
+
+        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $helper);
+        $curlGetinfoMock->expects($this->any())
+            ->will($this->returnValue($httpCode));
+
+        foreach (array('loadProfile', 'deleteProfile') as $func) {
+            try {
+                $helper->{$func}($profileId);
+            } catch (\Exception $ex) {
+                $errMsg = sprintf('Server failed with status code %d', $httpCode);
+
+                $this->assertEquals($errMsg, $ex->getMessage());
+            }
+        }
+    }
+
+    public function testShouldReturnErrorIfOccurredWhileRequestToLoadOrDeleteProfileDH () {
         $helper = $this->createHelper();
         
         $httpCode = 500;
@@ -196,15 +222,54 @@ class ProfileTest extends Base {
         
         $this->assertTrue($success);
     }
+
+    /**
+     * @expectedException        ErrorException
+     * @expectedExceptionMessage ProfileId should be a non-empty string
+     */
+    public function testShouldReturnErrorIfDeleteProfileWithEmptyId () {
+        $helper = $this->createHelper();
+        $helper->deleteProfile(null);
+        $helper->deleteProfile(false);
+        $helper->deleteProfile('');
+        $helper->deleteProfile(0);
+    }
+
+    /**
+     * @expectedException        ErrorException
+     * @expectedExceptionMessage ProfileId should be a non-empty string
+     */
+    public function testShouldReturnErrorIfDeleteProfileWithNotStringId () {
+        $helper = $this->createHelper();
+        $helper->deleteProfile(true);
+        $helper->deleteProfile(array(1,2,3));
+        $helper->deleteProfile(new \StdClass());
+    }
     
     public function testShouldReturnErrorIfProfileIsNotInstanceOfProfileWhileRequestToSaveProfile () {
         $helper = $this->createHelper();
-        
+
         try {
             $helper->saveProfile(true);
         } catch (\Exception $e) {
             $this->assertStringStartsWith('Argument 1 passed to Innometrics\Helper::saveProfile() must be an instance of Innometrics\Profile', $e->getMessage());
         }
+    }
+
+    /**
+     * @expectedException        ErrorException
+     * @expectedExceptionMessage Profile is not valid
+     */
+    public function testShouldReturnErrorWhileSavingNotValidProfile () {
+        $helper = $this->createHelper();
+        $profile = $helper->createProfile('qwe');
+        $profile->setSession(array(
+            'id' => '1',
+            'section' => '2',
+            'collectApp' => '3'
+        ));
+        $profile->getLastSession()->setCollectApp(null);
+        $helper->saveProfile($profile);
     }
     
     public function testShouldMakeProperlyRequestToSaveProfile () {
@@ -476,7 +541,19 @@ class ProfileTest extends Base {
             $this->assertStringStartsWith('Argument 1 passed to Innometrics\Helper::refreshLocalProfile() must be an instance of Innometrics\Profile', $e->getMessage());
         }
     }
-    
+
+    /**
+     * @expectedException        ErrorException
+     * @expectedExceptionMessage ProfileId should be a non-empty string
+     */
+    public function testShouldReturnErrorIfLoadProfileByEmptyId () {
+        $helper = $this->createHelper();
+        $helper->loadProfile(null);
+        $helper->loadProfile(false);
+        $helper->loadProfile(true);
+        $helper->loadProfile('');
+    }
+
     public function testShouldCallLoadProfileToRefreshProfile () {
         $config = $this->config;
         $profileId = 'profile-id';
