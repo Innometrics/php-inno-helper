@@ -113,19 +113,19 @@ class ProfileTest extends Base {
         ));
         $this->assertEquals('pid', $profile->getId());
         $attributes = $profile->getAttributes();
-        $this->assertEquals(count($attributes), 2);
+        $this->assertEquals(2, count($attributes));
         $attributes = $profile->getAttributes('collectApp1');
-        $this->assertEquals(count($attributes), 1);
+        $this->assertEquals(1, count($attributes));
         $attributes = $profile->getAttributes(null, 'section1');
-        $this->assertEquals(count($attributes), 1);
+        $this->assertEquals(1, count($attributes));
         $attribute = $profile->getAttribute('name1', 'collectApp1', 'section1');
-        $this->assertEquals($attribute->getValue(), 'value1');
+        $this->assertEquals('value1', $attribute->getValue());
         $sessions = $profile->getSessions(function ($session) {
             return $session->getCollectApp() === 'collectApp1';
         });
-        $this->assertEquals(count($sessions), 1);
+        $this->assertEquals(1, count($sessions));
         $session = $profile->getSession('sid');
-        $this->assertEquals($session->getDataValue('name1'), 'value1');
+        $this->assertEquals('value1', $session->getDataValue('name1'));
     }    
     
     public function testShouldNotThrowErrorOnEmptyConfig () {
@@ -140,7 +140,7 @@ class ProfileTest extends Base {
         
         $profileId = $profile->getId();
         $this->assertTrue(is_string($profileId));
-        $this->assertEquals(strlen($profileId), 32);
+        $this->assertEquals(32, strlen($profileId));
         
         $this->assertTrue(is_array($sessions));
         $this->assertCount(0, $sessions);
@@ -155,7 +155,7 @@ class ProfileTest extends Base {
             'id' => $profileId
         ));
         
-        $this->assertEquals($profile->getId(), $profileId);
+        $this->assertEquals($profileId, $profile->getId());
     }
     
     public function testShouldProperlySerializeProfile () {
@@ -181,7 +181,7 @@ class ProfileTest extends Base {
             $serializedData['sessions'][$key] = $item;
         }
         
-        $this->assertEquals($profile->serialize(), (object) $serializedData);
+        $this->assertEquals((object) $serializedData, $profile->serialize());
     }
     
     public function testShouldSerializeOnlyChangedDataOfProfile () {
@@ -204,7 +204,7 @@ class ProfileTest extends Base {
         
         $now = round(microtime(true) * 1000);
         
-        $this->assertEquals($profile->serialize(true), (object) array(
+        $this->assertEquals((object) array(
             'id' => 'pid',
             'attributes' => array(
                 (object) array(
@@ -244,7 +244,7 @@ class ProfileTest extends Base {
                     'events' => array()
                 )
             ) 
-        ));        
+        ), $profile->serialize(true));
     }    
     
     public function testShouldReturnErrorIfProfileIsNotInstanceOfProfileWhileProfileMerging () {
@@ -365,13 +365,13 @@ class ProfileTest extends Base {
         $profile1->merge($profile2);
         
         $this->assertCount(3, $profile1->getAttributes());
-        $this->assertEquals($profile1->getAttribute('foo', 'app1', 'sec1')->getValue(), 'baz');
+        $this->assertEquals('baz', $profile1->getAttribute('foo', 'app1', 'sec1')->getValue());
         
         $this->assertCount(3, $profile1->getSessions());
-        $this->assertEquals($profile1->getSession('sid2')->getData(), array(
+        $this->assertEquals(array(
             'test1' => 'e',
             'test2' => 'w'
-        ));
+        ), $profile1->getSession('sid2')->getData());
     }
     
     public function testShouldBeChangedIfHasChangedAttribute () {

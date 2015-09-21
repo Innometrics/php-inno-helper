@@ -52,13 +52,13 @@ class SessionsTest extends Base {
             'section'   => 'sec2'
         ]);
 
-        $this->assertEquals(count($profile->getSessions()) , 0);
+        $this->assertCount(0, $profile->getSessions());
 
         $profile->setSession($session1);
-        $this->assertEquals(count($profile->getSessions()), 1);
+        $this->assertCount(1, $profile->getSessions());
 
         $profile->setSession($session2);
-        $this->assertEquals(count($profile->getSessions()), 2);
+        $this->assertCount(2, $profile->getSessions());
     }
 
     public function testShouldReplaceSessionIfExistsWithSameId () {
@@ -74,17 +74,17 @@ class SessionsTest extends Base {
             'section'   => 'sec2'
         ]);
 
-        $this->assertEquals(count($profile->getSessions()) , 0);
+        $this->assertCount(0, $profile->getSessions());
 
         $profile->setSession($session1);
-        $this->assertEquals(count($profile->getSessions()), 1);
+        $this->assertCount(1, $profile->getSessions());
 
         $profile->setSession($session2);
-        $this->assertEquals(count($profile->getSessions()), 1);
+        $this->assertCount(1, $profile->getSessions());
 
         $session = $profile->getSessions()[0];
-        $this->assertEquals($session->getCollectApp(), 'app2');
-        $this->assertEquals($session->getSection(), 'sec2');
+        $this->assertEquals('app2', $session->getCollectApp());
+        $this->assertEquals('sec2', $session->getSection());
     }
 
     public function testShouldIgnoreSessionIfThisOneAlreadyInProfile () {
@@ -94,16 +94,16 @@ class SessionsTest extends Base {
             'collectApp'=> 'app',
             'section'   => 'sec'
         ]);
-        $this->assertEquals(count($profile->getSessions()) , 0);
+        $this->assertCount(0, $profile->getSessions());
 
         $profile->setSession($session1);
-        $this->assertEquals(count($profile->getSessions()), 1);
+        $this->assertCount(1, $profile->getSessions());
 
         $profile->setSession($session1);
-        $this->assertEquals(count($profile->getSessions()), 1);
+        $this->assertCount(1, $profile->getSessions());
         $session = $profile->getSessions()[0];
 
-        $this->assertEquals($session, $session1);
+        $this->assertEquals($session1, $session);
     }
 
     public function testShouldReturnSession () {
@@ -115,7 +115,7 @@ class SessionsTest extends Base {
             'section'   => 'sec'
         ]);
         $this->assertNull($profile->getSession('no existing'));
-        $this->assertEquals($profile->getSession('sid')->getId(), 'sid');
+        $this->assertEquals('sid', $profile->getSession('sid')->getId());
     }
 
     /**
@@ -132,7 +132,7 @@ class SessionsTest extends Base {
     public function testShouldReturnAllSessionsIfNoFilterFunction () {
         $profile = $this->createProfile();
         $sessions = $profile->getSessions();
-        $this->assertEquals(count($sessions), 0);
+        $this->assertCount(0, $sessions);
 
         $profile->setSession([
             'id'        => 'sid1',
@@ -146,7 +146,7 @@ class SessionsTest extends Base {
         ]);
 
         $sessions = $profile->getSessions();
-        $this->assertEquals(count($sessions), 2);
+        $this->assertCount(2, $sessions);
     }
 
     public function testShouldReturnOnlyFilteredSessions () {
@@ -165,17 +165,17 @@ class SessionsTest extends Base {
         $sessions = $profile->getSessions(function ($session) {
             return $session->getCollectApp() === 'app2';
         });
-        $this->assertEquals(count($sessions), 1);
+        $this->assertCount(1, $sessions);
 
         $session = $sessions[0];
-        $this->assertEquals($session->getId(), 'sid2');
-        $this->assertEquals($session->getCollectApp(), 'app2');
-        $this->assertEquals($session->getSection(), 'sec2');
+        $this->assertEquals('sid2', $session->getId());
+        $this->assertEquals('app2', $session->getCollectApp());
+        $this->assertEquals('sec2', $session->getSection());
     }
 
     public function testShouldReturnNullIfNoLastSession () {
         $profile = $this->createProfile();
-        $this->assertEquals($profile->getLastSession(), null);
+        $this->assertNull($profile->getLastSession());
     }
 
     public function testShouldReturnLastSession () {
@@ -194,7 +194,7 @@ class SessionsTest extends Base {
         ]);
 
         $session = $profile->getLastSession();
-        $this->assertEquals($session->getId(), 'sid1');
+        $this->assertEquals('sid1', $session->getId());
     }
 
 }

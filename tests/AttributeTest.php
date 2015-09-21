@@ -65,16 +65,16 @@ class AttributeTest extends PHPUnit_Framework_TestCase {
         $attribute = $this->createAttribute([
             'name' => 'test'
         ]);
-        $this->assertEquals($attribute->hasChanges(), true);
+        $this->assertEquals(true, $attribute->hasChanges());
     }
 
     public function testShouldNotBeDirtyAfterReset () {
         $attribute = $this->createAttribute([
             'name' => 'test'
         ]);
-        $this->assertEquals($attribute->hasChanges(), true);
+        $this->assertEquals(true, $attribute->hasChanges());
         $attribute->resetDirty();
-        $this->assertEquals($attribute->hasChanges(), false);
+        $this->assertEquals(false, $attribute->hasChanges());
     }
 
     public function testShouldBeMarkedAsDirty () {
@@ -87,9 +87,9 @@ class AttributeTest extends PHPUnit_Framework_TestCase {
 
         foreach ($setters as $setter=>$arg) {
             $attribute = $this->createAttribute();
-            $this->assertEquals($attribute->hasChanges(), false);
+            $this->assertEquals(false, $attribute->hasChanges());
             $attribute->$setter($arg);
-            $this->assertEquals($attribute->hasChanges(), true);
+            $this->assertEquals(true, $attribute->hasChanges());
         }
     }
 

@@ -12,9 +12,9 @@ class ProfileTest extends Base {
         $profileId = 'profile-id';
         $profile = $helper->createProfile($profileId);
         
-        $this->assertSame($profile->getId(), $profileId);
-        $this->assertEquals($profile->getSessions(), array());
-        $this->assertEquals($profile->getAttributes(), array());
+        $this->assertSame($profileId, $profile->getId());
+        $this->assertEquals(array(), $profile->getSessions());
+        $this->assertEquals(array(), $profile->getAttributes());
         $this->assertFalse($profile->hasChanges());
     }
     
@@ -386,7 +386,7 @@ class ProfileTest extends Base {
         
         $savedProfile = $helper->saveProfile($profile);
         
-        $this->assertSame($savedProfile->getId(), $savedProfileId);
+        $this->assertSame($savedProfileId, $savedProfile->getId());
         $this->assertFalse($savedProfile->hasChanges());
     }
     
@@ -657,10 +657,10 @@ class ProfileTest extends Base {
         $helper = $this->createHelper();
         
         $profile1 = $helper->getProfileFromRequest($jsonBody);
-        $this->assertEquals($profile1->getId(), $profileId);
+        $this->assertEquals($profileId, $profile1->getId());
         
         $profile2 = $helper->getProfileFromRequest(json_encode($jsonBody));
-        $this->assertEquals($profile2->getId(), $profileId);
+        $this->assertEquals($profileId, $profile2->getId());
     }
     
     /**
@@ -684,8 +684,8 @@ class ProfileTest extends Base {
             'meta' => $meta
         );
         
-        $this->assertSame($helper->getMetaFromRequest($jsonBody), $meta);
-        $this->assertSame($helper->getMetaFromRequest(json_encode($jsonBody)), $meta);
+        $this->assertSame($meta, $helper->getMetaFromRequest($jsonBody));
+        $this->assertSame($meta, $helper->getMetaFromRequest(json_encode($jsonBody)));
     }    
     
 }

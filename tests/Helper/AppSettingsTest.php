@@ -115,11 +115,11 @@ class AppSettingsTest extends Base {
         
         // Request to server
         $settings1 = $helper->getAppSettings();
-        $this->assertEquals($settings1, $values);
+        $this->assertEquals($values, $settings1);
         
         // From cache
         $settings2 = $helper->getAppSettings();
-        $this->assertEquals($settings2, $values);
+        $this->assertEquals($values, $settings2);
     }
     
     public function testShouldRequestToServerIfNoCacheAllowedWhileGettingSettings () {
@@ -142,11 +142,11 @@ class AppSettingsTest extends Base {
         
         // Request to server
         $settings1 = $helper->getAppSettings();
-        $this->assertEquals($settings1, $values);
+        $this->assertEquals($values, $settings1);
         
         // From cache
         $settings2 = $helper->getAppSettings();
-        $this->assertEquals($settings2, $values);
+        $this->assertEquals($values, $settings2);
     }
     
     /**
@@ -266,7 +266,7 @@ class AppSettingsTest extends Base {
             ->will($this->returnValue(200));
         
         $settings1 = $helper->setAppSettings(array());
-        $this->assertEquals($settings1, $values);
+        $this->assertEquals($values, $settings1);
 
         $cacheMethod = new \ReflectionMethod('Innometrics\Helper', 'getCacheKey');
         $cacheMethod->setAccessible(true);
@@ -275,14 +275,14 @@ class AppSettingsTest extends Base {
         $cacheProp = new \ReflectionProperty('Innometrics\Helper', 'cache');
         $cacheProp->setAccessible(true);
         $cache = $cacheProp->getValue($helper);
-        $this->assertEquals($cache->get($cacheKey), $values);
+        $this->assertEquals($values, $cache->get($cacheKey));
         
         $cache->clearCache();
         $helper->setCacheAllowed(false);
         
         $settings2 = $helper->setAppSettings(array());
-        $this->assertEquals($settings2, $values);
-        $this->assertNull($cache->get($cacheKey), null);
+        $this->assertEquals($values, $settings2);
+        $this->assertNull($cache->get($cacheKey));
     }
     
 }
