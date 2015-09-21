@@ -10,6 +10,18 @@ class AttributeTest extends PHPUnit_Framework_TestCase {
         return new Attribute($config);
     }
 
+    public function testShouldNotThrowErrorWhenCreateWithEmptyData () {
+        $ok = false;
+        try {
+            $this->createAttribute();
+            $this->createAttribute([]);
+            $ok = true;
+        } catch (\Exception $e) {
+
+        }
+        $this->assertTrue($ok);
+    }
+
     public function testShouldNotThrowErrorOnIsValid () {
         $attribute = $this->createAttribute(array(
             'collectApp' => 'collectApp1',
@@ -49,4 +61,44 @@ class AttributeTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('value2', $attribute->getValue(), 'setValue test');
     }
 
+    public function testShouldBeDirtyAfterCreation () {
+        $attribute = $this->createAttribute([
+            'name' => 'test'
+        ]);
+        $this->assertEquals($attribute->hasChanges(), true);
+    }
+
+    public function testShouldNotBeDirtyAfterReset () {
+        $attribute = $this->createAttribute([
+            'name' => 'test'
+        ]);
+        $this->assertEquals($attribute->hasChanges(), true);
+        $attribute->resetDirty();
+        $this->assertEquals($attribute->hasChanges(), false);
+    }
+
+    public function testShouldBeMarkedAsDirty () {
+        $setters = [
+            'setName' => 'test',
+            'setValue' => 123,
+            'setCollectApp' => 'app1',
+            'setSection' => 'sec1'
+        ];
+
+        foreach ($setters as $setter=>$arg) {
+            $attribute = $this->createAttribute();
+            $this->assertEquals($attribute->hasChanges(), false);
+            $attribute->$setter($arg);
+            $this->assertEquals($attribute->hasChanges(), true);
+        }
+    }
+
 }
+
+
+
+
+
+
+
+
