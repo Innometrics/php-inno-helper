@@ -128,7 +128,7 @@ class EventTest extends PHPUnit_Framework_TestCase {
         $event->setCreatedAt('date');
     }
 
-    public function testShouldSupportDateTimeObjectForsetCreateAt () {
+    public function testShouldSupportDateTimeObjectForsedCreateAt () {
         $event = $this->createEvent(array(
             'definitionId' => 'name1',
             'data'         => array('name1' => 'value1')
@@ -136,6 +136,22 @@ class EventTest extends PHPUnit_Framework_TestCase {
         $now = new DateTime('now');
         $event->setCreatedAt($now);
         $this->assertEquals($now->getTimestamp() * 1000, $event->getCreatedAt());
+    }
+
+    public function testShouldThrowErrorIfTimeIsNumberButNotInMilliseconds () {
+        $event = $this->createEvent();
+        try {
+            $event->setCreatedAt(time());
+        } catch (\Exception $e) {
+            $this->assertEquals('Timestamp should be in milliseconds', $e->getMessage());
+        }
+        $noException = true;
+        try {
+            $event->setCreatedAt(time()*1000);
+        } catch (\Exception $e) {
+            $noException = false;
+        }
+        $this->assertTrue($noException);
     }
 
     public function testShouldBeDirtyAfterCreation () {
