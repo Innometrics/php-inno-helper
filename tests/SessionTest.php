@@ -203,7 +203,7 @@ class SessionTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @expectedException        ErrorException
-     * @expectedExceptionMessage Wrond date "date". It should be an double or a DateTime instance.
+     * @expectedExceptionMessage Wrong date "date". It should be an double or a DateTime instance.
      */
     public function testShouldThrowErrorOnNoValidDate () {
         $session = $this->createSession(array(

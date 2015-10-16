@@ -2,9 +2,6 @@
 
 namespace Innometrics;
 
-use Innometrics\Event;
-use Innometrics\IdGenerator;
-
 /**
  * InnoHelper TODO add description
  * @copyright 2015 Innometrics
@@ -124,20 +121,33 @@ class Session {
     /**
      * Set timestamp when session was created
      * Passed argument should be a number or Date instance
-     * @param double|DateTime $date
+     * @param double|\DateTime $date
      * @return Session
+     * @throws \ErrorException
      */
     public function setCreatedAt ($date) {
-        if (!is_double($date) && !($date instanceof \DateTime)) {
-            throw new \ErrorException('Wrond date "' . $date . '". It should be an double or a DateTime instance.');
+        if (is_numeric($date) && !$this->isTimestampWithMilliseconds($date)) {
+            throw new \ErrorException('Timestamp should be in milliseconds');
+        }
+
+        if (!is_numeric($date) && !($date instanceof \DateTime)) {
+            throw new \ErrorException('Wrong date "' . $date . '". It should be an double or a DateTime instance.');
         }
         
         if ($date instanceof \DateTime) {
             $ts = $date->getTimestamp();
             $date = $ts * 1000;
         }
-        
+
+        $date = doubleval($date);
+
         return $this->setField('createdAt', $date);
+    }
+
+    protected function isTimestampWithMilliseconds ($ts) {
+        $tsLength = strval($ts);
+        $nowLength = strval(microtime(true));
+        return $tsLength >= $nowLength;
     }
     
     /**
@@ -221,8 +231,9 @@ class Session {
     /**
      * Add event to session
      * If event with same id already exist in session then Error will be thrown
-     * @param Event|array $event
-     * @return Event
+     * @param $event
+     * @return \Innometrics\Event
+     * @throws \ErrorException
      */
     public function addEvent ($event) {
         if (!($event instanceof Event)) {
@@ -340,6 +351,7 @@ class Session {
      * Merge data from passed session to current
      * @param Session $session
      * @return Session
+     * @throws \ErrorException
      */
     public function merge (Session $session) {
         if ($this->getId() !== $session->getId()) {

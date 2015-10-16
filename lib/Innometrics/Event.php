@@ -78,14 +78,16 @@ class Event {
     /**
      * Set date (in ms) when event was created
      * Double or DateTime instance can be used.
-     * @param double|DateTime date
+     * @param double|\DateTime $date
      * @return Event
+     * @throws \ErrorException
      */
     public function setCreatedAt ($date) {
         if (is_numeric($date) && !$this->isTimestampWithMilliseconds($date)) {
             throw new \ErrorException('Timestamp should be in milliseconds');
         }
-        if (!is_double($date) && !($date instanceof \DateTime)) {
+
+        if (!is_numeric($date) && !($date instanceof \DateTime)) {
             throw new \ErrorException('Wrong date "' . $date . '". It should be an double or a DateTime instance.');
         }
 
@@ -93,6 +95,8 @@ class Event {
             $ts = $date->getTimestamp();
             $date = $ts * 1000;
         }
+
+        $date = doubleval($date);
 
         return $this->setField('createdAt', $date);
     }
