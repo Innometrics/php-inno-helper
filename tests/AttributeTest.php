@@ -29,7 +29,7 @@ class AttributeTest extends PHPUnit_Framework_TestCase {
             'name'       => 'name1',
             'value'      => 'value1'
         ));
-        $this->assertTrue($attribute->isValid());
+        $this->assertFalse($attribute->isValid());
     }
 
     public function testShouldBeInvalidOnInvalid () {
