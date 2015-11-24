@@ -8,7 +8,7 @@ use Innometrics\Segment;
 require_once('vendor/autoload.php');
 
 /**
- * InnoHelper TODO add description
+ * InnoHelper
  * @copyright 2015 Innometrics
  */
 class Helper {
@@ -83,7 +83,8 @@ class Helper {
 
         if ($this->isCacheAllowed()) {
             $this->cache = new Cache(array(
-                'cachedTime' => 600 // 10 min
+                // 10 min
+                'cachedTime' => 600
             ));
         }        
     }
@@ -315,12 +316,12 @@ class Helper {
      * @throws \ErrorException If settings are not found exception will be thrown
      */
     public function getAppSettings () {
-        $cache = $this->cache;
+        $appCache = $this->cache;
         $cacheAllowed = $this->isCacheAllowed();
         $cacheKey = $this->getCacheKey('settings');
 
         if ($cacheAllowed) {
-            $cachedValue = $cache->get($cacheKey);
+            $cachedValue = $appCache->get($cacheKey);
             if (!is_null($cachedValue)) {
                 return $cachedValue;
             }
@@ -339,7 +340,7 @@ class Helper {
         }
         
         if ($cacheAllowed) {
-            $cache->set($cacheKey, $body['custom']);
+            $appCache->set($cacheKey, $body['custom']);
         }
 
         return $body['custom'];

@@ -5,7 +5,7 @@ namespace Innometrics;
 use Innometrics\IdGenerator;
 
 /**
- * InnoHelper TODO add description
+ * InnoHelper Event definition class
  * @copyright 2015 Innometrics
  */
 class Event {
