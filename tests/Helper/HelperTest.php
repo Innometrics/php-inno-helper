@@ -15,7 +15,7 @@ class HelperTest extends Base {
      */     
     public function testShouldThrowErrorOnEmptyConfig () {
 //        $this->createHelper();
-        new Helper();
+        $helper = new Helper();
     }
     
     /**
