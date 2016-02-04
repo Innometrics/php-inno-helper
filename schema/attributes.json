@@ -1,0 +1,7 @@
+{
+    "id": "attributes",
+    "type": "array",
+    "items": {
+        "$ref": "attribute.json"
+    }
+}

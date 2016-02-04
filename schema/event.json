@@ -1,0 +1,19 @@
+{
+    "id": "event",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "createdAt": {
+            "type": "number"
+        },
+        "definitionId": {
+            "type": "string"
+        },
+        "data": {
+            "type": "object"
+        }
+    },
+    "required": ["id", "createdAt", "definitionId", "data"]
+}

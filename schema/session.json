@@ -1,0 +1,66 @@
+{
+    "id": "session",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "createdAt": {
+            "type": "number"
+        },
+        "collectApp": {
+            "type": "string"
+        },
+        "section": {
+            "type": "string"
+        },
+        "data": {
+            "type": "object",
+            "properties": {
+                "countryCode": {
+                    "type": "number"
+                },
+                "countryName": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "dmaCode": {
+                    "type": "number"
+                },
+                "areaCode": {
+                    "type": "number"
+                },
+                "metroCode": {
+                    "type": "number"
+                },
+                "organization": {
+                    "type": "string"
+                },
+                "isp": {
+                    "type": "string"
+                }
+            }
+        },
+        "events": {
+            "$ref": "events.json"
+        },
+        "modifiedAt": {
+            "type": "number"
+        }
+    },
+    "required": ["id", "createdAt", "collectApp", "section", "data", "events", "modifiedAt"]
+}
