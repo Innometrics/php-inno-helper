@@ -10,7 +10,7 @@
         "illuminate/container": "*",
         "illuminate/filesystem": "*",
         "illuminate/cache": "*",
-        "justinrainbow/json-schema": "*"
+        "justinrainbow/json-schema": "~1.4.4"
     },
     "require-dev": {
         "tcz/phpunit-mockfunction": "*",
