@@ -3,18 +3,17 @@
     "type": "library",
     "description": "Innometrics helper",
     "homepage": "http://www.innometrics.com",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "require": {
         "php": ">=5.3.2",
-        "lib-curl": "*",
-        "illuminate/container": "*",
-        "illuminate/filesystem": "*",
-        "illuminate/cache": "*",
+        "illuminate/container": "v5.0.33",
+        "illuminate/filesystem": "v5.0.33",
+        "illuminate/cache": "v5.0.33",
         "justinrainbow/json-schema": "~1.4.4"
     },
     "require-dev": {
-        "tcz/phpunit-mockfunction": "*",
-        "mockery/mockery": "*"
+        "tcz/phpunit-mockfunction": "v1.0.0",
+        "mockery/mockery": "~0.9.4"
     },
     "autoload": {
         "psr-4": { "Innometrics\\": "lib/Innometrics" }
