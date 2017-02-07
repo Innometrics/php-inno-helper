@@ -33,12 +33,6 @@ class Session {
     protected $createdAt = null;
 
     /**
-     * Timestamp in ms when session was changed
-     * @var double
-     */
-    protected $modifiedAt = null;
-
-    /**
      * Session data object
      * @var array
      */
@@ -61,9 +55,9 @@ class Session {
      * @var bool
      */
     protected $dataDirty = false;
-    
+
     /**
-     * @param array $config equals to {id: id, section: sectionId, collectApp: collectApp, data: data, events: events, createdAt: timestamp, modifiedAt: modifiedAt }
+     * @param array $config equals to {id: id, section: sectionId, collectApp: collectApp, data: data, events: events, createdAt: timestamp }
      */
     public function __construct($config = array()) {
         $now = round(microtime(true) * 1000);
@@ -73,10 +67,9 @@ class Session {
         $this->setCollectApp(isset($config['collectApp']) ? $config['collectApp'] : null);
         $this->setSection(isset($config['section']) ? $config['section'] : null);
         $this->setCreatedAt(isset($config['createdAt']) ? $config['createdAt'] : $now);
-        $this->modifiedAt = isset($config['modifiedAt']) ? $config['modifiedAt'] : $now;
-        $this->initEvents(isset($config['events']) ? $config['events'] : array());        
+        $this->initEvents(isset($config['events']) ? $config['events'] : array());
     }
-    
+
     /**
      * Set session property and mark it as dirty
      * @param string $field Property to be set
@@ -89,8 +82,8 @@ class Session {
             $this->setDirty();
         }
         return $this;
-    }    
-    
+    }
+
     /**
      * Set session id
      * @param string $id
@@ -99,7 +92,7 @@ class Session {
     public function setId ($id) {
         return $this->setField('id', $id);
     }
-    
+
     /**
      * Set session application name
      * @param string $collectApp
@@ -108,7 +101,7 @@ class Session {
     public function setCollectApp ($collectApp) {
         return $this->setField('collectApp', $collectApp);
     }
-    
+
     /**
      * Set session section name
      * @param string $section
@@ -117,7 +110,7 @@ class Session {
     public function setSection ($section) {
         return $this->setField('section', $section);
     }
-    
+
     /**
      * Set timestamp when session was created
      * Passed argument should be a number or Date instance
@@ -133,7 +126,7 @@ class Session {
         if (!is_numeric($date) && !($date instanceof \DateTime)) {
             throw new \ErrorException('Wrong date "' . $date . '". It should be an double or a DateTime instance.');
         }
-        
+
         if ($date instanceof \DateTime) {
             $ts = $date->getTimestamp();
             $date = $ts * 1000;
@@ -149,7 +142,7 @@ class Session {
         $nowLength = strval(microtime(true));
         return $tsLength >= $nowLength;
     }
-    
+
     /**
      * Update session data with values
      * Data is an array with key=>value pair(s).
@@ -159,7 +152,7 @@ class Session {
     public function setData ($data) {
         return $this->setField('data', array_merge($this->data, $data));
     }
-    
+
     /**
      * Set single value of session data
      * @param string $name
@@ -171,7 +164,7 @@ class Session {
         $this->setDataDirty();
         return $this;
     }
-    
+
     /**
      * Get session id
      * @return string
@@ -179,7 +172,7 @@ class Session {
     public function getId () {
         return $this->id;
     }
-    
+
     /**
      * Get session application name
      * @return string
@@ -187,7 +180,7 @@ class Session {
     public function getCollectApp () {
         return $this->collectApp;
     }
-    
+
     /**
      * Get session section name
      * @return string
@@ -195,7 +188,7 @@ class Session {
     public function getSection () {
         return $this->section;
     }
-    
+
     /**
      * Get timestamp in ms when session was created
      * @return double
@@ -203,15 +196,16 @@ class Session {
     public function getCreatedAt () {
         return $this->createdAt;
     }
-    
+
     /**
      * Get timestamp in ms when session was changed
      * @return double
      */
     public function getModifiedAt () {
-        return $this->modifiedAt;
+        $lastEvent = $this->getLastEvent();
+        return $lastEvent ? $lastEvent->getCreatedAt() : $this->createdAt;
     }
-    
+
     /**
      * Get session data object
      * @return array
@@ -219,7 +213,7 @@ class Session {
     public function getData () {
         return $this->data;
     }
-    
+
     /**
      * Get single value from session data object
      * @return mixed
@@ -252,9 +246,9 @@ class Session {
 
         $events = $this->getEvents();
         $events[] = $event;
-        
+
         $this->events = $events;
-        
+
         $this->setDirty();
 
         return $event;
@@ -270,7 +264,7 @@ class Session {
             return $event->getId() === $eventId;
         });
         $keys = array_keys($events);
-        return count($keys) ? $events[$keys[0]] : null;        
+        return count($keys) ? $events[$keys[0]] : null;
     }
 
     /**
@@ -300,16 +294,16 @@ class Session {
 
         return $events;
     }
-    
+
     /**
      * Check if session is valid (all required fields are present)
      * @return bool
      */
     public function isValid () {
-        return Validator::isSessionValid($this->serialize()) && 
+        return Validator::isSessionValid($this->serialize()) &&
             !!$this->getId() && !!$this->getSection() && !!$this->getCollectApp() && !!$this->getCreatedAt();
     }
-    
+
     /**
      * Serialize session from Session instance to array
      * @param bool $onlyChanges
@@ -322,15 +316,14 @@ class Session {
         if (!$onlyChanges || $this->hasDataChanges()) {
             $data = $this->getData();
         }
-        
+
         return (object) array(
             'id' =>         $this->getId(),
             'section' =>    $this->getSection(),
             'collectApp' => $this->getCollectApp(),
             'data' =>       (object) $data,
             'events' =>     $events,
-            'createdAt' =>  $this->getCreatedAt(),
-            'modifiedAt' => $this->getModifiedAt()
+            'createdAt' =>  $this->getCreatedAt()
         );
     }
 
@@ -358,11 +351,6 @@ class Session {
             throw new \ErrorException('Session IDs should be similar');
         }
 
-        // update last changed date
-        if ($session->modifiedAt > $this->modifiedAt) {
-            $this->modifiedAt = $session->modifiedAt;
-        }
-
         // merge data
         $this->setData($session->getData());
 
@@ -371,7 +359,7 @@ class Session {
         foreach ($this->getEvents() as $event) {
             $eventsMap[$event->getId()] = $event;
         }
-        
+
         foreach ($session->getEvents() as $event) {
             $id = $event->getId();
             if (!isset($eventsMap[$id])) {
@@ -421,18 +409,18 @@ class Session {
      */
     private function serializeEvents ($onlyChanges = false) {
         $eventsMap = array();
-        
+
         foreach ($this->getEvents() as $event) {
             if ($onlyChanges && !$event->hasChanges()) {
                 continue;
             }
-            
+
             $eventsMap[] = $event->serialize();
         }
-        
-        return $eventsMap;        
+
+        return $eventsMap;
     }
-    
+
     /**
      * Mark attribute as "dirty"
      * @return Session
@@ -441,7 +429,7 @@ class Session {
         $this->dirty = true;
         return $this;
     }
-    
+
     /**
      * Resets "dirty" status
      * @return Session
@@ -449,14 +437,14 @@ class Session {
     public function resetDirty () {
         $this->dirty = false;
         $this->dataDirty = false;
-        
+
         foreach ($this->getEvents() as $event) {
             $event->resetDirty();
         }
-        
+
         return $this;
     }
-    
+
     /**
      * Mark session data as "dirty"
      * @return Session
@@ -473,7 +461,7 @@ class Session {
     public function hasChanges () {
         return !!$this->dirty || $this->hasDataChanges() || $this->hasEventsChanges();
     }
-    
+
     /**
      * Check if session has changes in data property
      * @return bool
@@ -492,8 +480,8 @@ class Session {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
 }

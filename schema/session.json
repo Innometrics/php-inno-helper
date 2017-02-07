@@ -57,10 +57,7 @@
         },
         "events": {
             "$ref": "events.json"
-        },
-        "modifiedAt": {
-            "type": "number"
         }
     },
-    "required": ["id", "createdAt", "collectApp", "section", "data", "events", "modifiedAt"]
+    "required": ["id", "createdAt", "collectApp", "section", "data", "events"]
 }
