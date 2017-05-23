@@ -41,8 +41,8 @@ class Helper {
      * API url
      * @var string
      */
-    protected $apiUrl = null;    
-    
+    protected $apiUrl = null;
+
     /**
      * No cache flag
      * @var bool
@@ -75,8 +75,9 @@ class Helper {
         $this->apiUrl = $config['apiUrl'];
         $this->bucketName = $config['bucketName'];
         $this->appName = $config['appName'];
-        $this->appKey = $config['appKey'];   
-        
+        $this->appKey = $config['appKey'];
+        $this->schedulerApiHost = $config['schedulerApiHost'];
+
         if (isset($config['noCache'])) {
             $this->noCache = !!$config['noCache'];
         }
@@ -86,9 +87,117 @@ class Helper {
                 // 10 min
                 'cachedTime' => 600
             ));
-        }        
+        }
     }
-    
+
+    /**
+     * Scheduler API host
+     * @var string
+     */
+    protected $schedulerApiHost = null;
+
+    /**
+     * Get Scheduler Api url
+     * @return string
+     */
+    protected function getSchedulerApiHost () {
+        return $this->schedulerApiHost;
+    }
+
+    /**
+     * Build Url for API request to scheduler
+     * @return string
+     */
+    protected function getSchedulerApiUrl (array $params = array()) {
+        return sprintf(
+            '%s/scheduler/%s%s?token=%s',
+            $this->getSchedulerApiHost(),
+            $this->getSchedulerId(),
+            isset($params['taskId']) ? '/'.$params['taskId'] : '',
+            $this->getSchedulerToken()
+        );
+    }
+
+    /**
+     * Get Scheduler id
+     * @return string
+     */
+    protected function getSchedulerId () {
+        return $this->getCompany().'-'.$this->getBucket().'-'.$this->getCollectApp();
+    }
+
+    /**
+     * Get Scheduler token
+     * @return string
+     */
+    protected function getSchedulerToken () {
+        return $this->getAppKey();
+    }
+
+    /**
+     * Get application tasks
+     * @return array
+     */
+    public function getTasks () {
+        $url = $this->getSchedulerApiUrl();
+        $response = $this->request(array(
+            'url'   => $url
+        ));
+        $this->checkErrors($response, 200);
+
+        $body = $response['body'];
+
+        return $body;
+    }
+
+    /**
+     * Add application task
+     * @param {Object} params
+     *     @example
+     *     {
+     *         "endpoint": "string", // required
+     *         "method": "string", // required
+     *         "headers": {},
+     *         "id": "string",
+     *         "payload": "string",
+     *         "timestamp": 0
+     *     }
+     * @return bool
+     */
+    public function addTask ($params) {
+        $url = $this->getSchedulerApiUrl();
+        $response = $this->request(array(
+            'url'  => $url,
+            'type' => 'post',
+            'body' => json_encode($params)
+        ));
+
+        $this->checkErrors($response, array(201));
+
+        return true;
+    }
+
+    /**
+     * Delete application task
+     * @param {Object} params
+     *     @example
+     *     {
+     *         "taskId": "string", // required
+     *     }
+     * @return bool
+     */
+    public function deleteTask ($params) {
+        $url = $this->getSchedulerApiUrl($params);
+        $response = $this->request(array(
+            'url'  => $url,
+            'type' => 'delete'
+        ));
+
+        $this->checkErrors($response, array(204));
+
+        return true;
+    }
+
     /**
      * Get application name
      * @return string
@@ -128,7 +237,7 @@ class Helper {
     public function getApiHost () {
         return $this->apiUrl;
     }
-    
+
     /**
      * Build Url for API request to work with certain Profile
      *
@@ -140,7 +249,7 @@ class Helper {
      *
      * @param string $profileId
      * @return string URL to make API request
-     */    
+     */
     protected function getProfileUrl ($profileId) {
         return sprintf(
             '%s/v1/companies/%s/buckets/%s/profiles/%s?app_key=%s',
@@ -162,7 +271,7 @@ class Helper {
      *      http://api.innomdc.com/v1/companies/42/buckets/testbucket/apps/testapp/custom?app_key=8HJ3hnaxErdJJ62H
      *
      * @return string URL to make API request
-     */    
+     */
     protected function getAppSettingsUrl () {
         return sprintf(
             '%s/v1/companies/%s/buckets/%s/apps/%s/custom?app_key=%s',
@@ -203,7 +312,7 @@ class Helper {
             http_build_query($params)
         );
     }
-    
+
     /**
      * Is cache allowed?
      * @return bool
@@ -211,21 +320,21 @@ class Helper {
     public function isCacheAllowed () {
         return !$this->noCache;
     }
-    
+
     /**
      * Set cache admission
      */
     public function setCacheAllowed ($value) {
         $this->noCache = !$value;
     }
-    
+
     /**
      * Clear all cache records
      */
     public function clearCache () {
         $this->cache->clearCache();
     }
-    
+
     /**
      * Internal method to make http requests, curl used
      * @param array $params List of parameters to configure request
@@ -239,13 +348,13 @@ class Helper {
      */
     protected static function request ($params) {
         $curl = curl_init();
-        
+
         $type = strtolower(isset($params['type']) ? $params['type'] : 'get');
         switch ($type) {
             case 'post':
             case 'put':
             case 'delete':
-                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, strtoupper($type));
                 if (!empty($params['body'])) {
                     curl_setopt($curl, CURLOPT_POSTFIELDS, $params['body']);
                 }
@@ -272,27 +381,27 @@ class Helper {
             $headers = array_unique($headers);
         }
         */
-        
+
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($curl, CURLOPT_URL, $params['url']);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($curl);
-        
+
         if ($response === false) {
             $error = curl_error($curl) ? curl_error($curl) : 'Unknown error';
             throw new \ErrorException($error);
         } else {
             $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            
+
             curl_close($curl);
-            
+
             return array(
                 'body'      => json_decode($response, true),
                 'httpCode'  => $httpCode
             );
-        }        
+        }
     }
-    
+
     /**
      * Get application settings
      *
@@ -326,19 +435,19 @@ class Helper {
                 return $cachedValue;
             }
         }
-        
+
         $url = $this->getAppSettingsUrl();
         $response = $this->request(array(
             'url' => $url
         ));
-        
+
         $this->checkErrors($response);
 
         $body = $response['body'];
         if (!isset($body['custom'])) {
             throw new \ErrorException('Custom settings not found');
         }
-        
+
         if ($cacheAllowed) {
             $appCache->set($cacheKey, $body['custom']);
         }
@@ -363,30 +472,30 @@ class Helper {
         if (!is_array($settings)) {
             throw new \ErrorException('Settings should be an array');
         }
-        
+
         $url = $this->getAppSettingsUrl();
         $response = $this->request(array(
             'url'  => $url,
             'type' => 'put',
             'body' => json_encode($settings)
         ));
-        
+
         $this->checkErrors($response);
-        
+
         $body = $response['body'];
         if (!isset($body['custom'])) {
             throw new \ErrorException('Custom settings not found');
         }
-        
+
         $cacheAllowed = $this->isCacheAllowed();
         $cacheKey = $this->getCacheKey('settings');
         if ($cacheAllowed) {
             $this->cache->set($cacheKey, $body['custom']);
         }
-        
+
         return $body['custom'];
     }
-    
+
     /**
      * Get segments
      * @return Segment[]
@@ -400,7 +509,7 @@ class Helper {
         $this->checkErrors($response);
 
         $segments = array();
-        $body = $response['body'];        
+        $body = $response['body'];
         if (is_array($body)) {
             foreach ($body as $sgmData) {
                 if (isset($sgmData['segment']) && is_array($sgmData['segment'])) {
@@ -410,7 +519,7 @@ class Helper {
                 }
             }
         }
-        
+
         return $segments;
     }
 
@@ -458,20 +567,20 @@ class Helper {
         if (empty($profileId) || gettype($profileId) !== 'string' || !($profileId = trim($profileId))) {
             throw new \ErrorException('ProfileId should be a non-empty string');
         }
-        
+
         $url = $this->getProfileUrl($profileId);
         $response = $this->request(array(
-            'url' => $url         
+            'url' => $url
         ));
-        $this->checkErrors($response); 
-        
+        $this->checkErrors($response);
+
         $body = $response['body'];
-        
+
         if (isset($body['profile']) && is_array($body['profile'])) {
             $profile = new Profile($body['profile']);
             $profile->resetDirty();
         }
-        
+
         return $profile;
     }
 
@@ -484,15 +593,15 @@ class Helper {
         if (empty($profileId) || gettype($profileId) !== 'string' || !($profileId = trim($profileId))) {
             throw new \ErrorException('ProfileId should be a non-empty string');
         }
-        
+
         $url = $this->getProfileUrl($profileId);
         $response = $this->request(array(
             'url'   => $url,
-            'type'  => 'delete'     
+            'type'  => 'delete'
         ));
-        
+
         $this->checkErrors($response, 204);
-        
+
         return true;
     }
 
@@ -503,11 +612,11 @@ class Helper {
      */
     public function saveProfile (Profile $profile) {
         $profileData = $profile->serialize(true);
-        
+
         if (!Validator::isProfileValid($profileData)) {
             throw new \ErrorException('Profile is not valid');
-        }        
-        
+        }
+
         $profileId = $profile->getId();
         $url = $this->getProfileUrl($profileId);
         $response = $this->request(array(
@@ -515,15 +624,15 @@ class Helper {
             'type' => 'post',
             'body' => json_encode($profileData)
         ));
-        
-        $this->checkErrors($response, array(200, 201));     
-        
+
+        $this->checkErrors($response, array(200, 201));
+
         $body = $response['body'];
         if (isset($body['profile']) && is_array($body['profile'])) {
             $profile = new Profile($body['profile']);
             $profile->resetDirty();
         }
-        
+
         return $profile;
     }
 
@@ -546,17 +655,17 @@ class Helper {
                 )
             ))
         ));
-        
-        $this->checkErrors($response, array(200, 201));     
-        
+
+        $this->checkErrors($response, array(200, 201));
+
         $profile = null;
         $body = $response['body'];
         if (isset($body['profile']) && is_array($body['profile'])) {
             $profile = new Profile($body['profile']);
             $profile->resetDirty();
         }
-        
-        return $profile;        
+
+        return $profile;
     }
 
     /**
@@ -568,7 +677,7 @@ class Helper {
         $profileId = $profile->getId();
         $loadedProfile = $this->loadProfile($profileId);
         $profile->merge($loadedProfile);
-        
+
         return $profile;
     }
 
@@ -581,11 +690,11 @@ class Helper {
         if (!is_array($requestBody)) {
             $requestBody = json_decode($requestBody, true);
         }
-        
+
         if (!isset($requestBody['profile'])) {
             throw new \ErrorException('Profile not found');
         }
-        
+
         return new Profile($requestBody['profile']);
     }
 
@@ -598,12 +707,12 @@ class Helper {
         if (!is_array($requestBody)) {
             $requestBody = json_decode($requestBody, true);
         }
-        
+
         if (!isset($requestBody['meta'])) {
             throw new \ErrorException('Meta not found');
-        }        
-        
-        return $requestBody['meta'];        
+        }
+
+        return $requestBody['meta'];
     }
 
     /**
@@ -631,7 +740,7 @@ class Helper {
         $successCode = (array)$successCode;
         $body = $response['body'];
         $httpCode = $response['httpCode'];
-        
+
         if (
             !in_array($httpCode, $successCode) ||
             isset($body['statusCode']) && !in_array($body['statusCode'], $successCode)
@@ -641,9 +750,9 @@ class Helper {
             } else {
                 $msg = sprintf('Server failed with status code %s', $httpCode);
             }
-            
+
             throw new \ErrorException($msg);
-        }        
+        }
     }
 
     /**
@@ -659,23 +768,23 @@ class Helper {
         );
 
         $params = array_merge($params, $defParams);
-        
+
         $url = $this->getSegmentEvaluationUrl($params);
-        
+
         $response = $this->request(array(
             'url' => $url
         ));
-        
-        $this->checkErrors($response);  
-        
+
+        $this->checkErrors($response);
+
         $body = $response['body'];
         if (isset($body['segmentEvaluation']) && isset($body['segmentEvaluation']['result'])) {
             $result = $body['segmentEvaluation']['result'];
         }
-        
+
         return $result;
-    }    
-    
+    }
+
     /**
      * Checks if config is valid
      * @throws \ErrorException If config are not suitable exception will be thrown
@@ -701,7 +810,7 @@ class Helper {
         if (!array_key_exists('groupId', $config)) {
             throw new \ErrorException('Property "groupId" in config should be defined');
         }
-        
+
         $groupId = $config['groupId'];
         $groupIdType = gettype($groupId);
         if ($groupIdType !== 'string' && $groupIdType !== 'integer') {
@@ -710,8 +819,8 @@ class Helper {
         if (!trim((string)$groupId)) {
             throw new \ErrorException('Property "groupId" in config can not be empty');
         }
-    } 
-    
+    }
+
     /**
      * Generate key for cache
      * @param string $name
