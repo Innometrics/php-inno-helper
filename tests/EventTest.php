@@ -24,7 +24,7 @@ class EventTest extends PHPUnit_Framework_TestCase {
     public function testShouldGenerateOnlySomePropsByDefault () {
         $event = $this->createEvent();
         $this->assertStringMatchesFormat("%s", $event->getId());
-        $this->assertInternalType('double', $event->getCreatedAt());
+        $this->assertInternalType('float', $event->getCreatedAt());
         $this->assertInternalType('array', $event->getData());
         $this->assertEmpty($event->getDefinitionId());
         $this->assertFalse($event->isValid());

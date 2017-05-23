@@ -20,11 +20,11 @@ class SessionsTest extends Base {
                 )
             )
         ));
-        
+
         $sessions = $profile->getSessions();
-        
+
         $this->assertCount(1, $sessions);
-        
+
         $session = $sessions[0];
         $this->assertEquals($session->getCollectApp(), 'app');
         $this->assertEquals($session->getSection(), 'sec');
@@ -184,13 +184,27 @@ class SessionsTest extends Base {
             'id'        => 'sid1',
             'collectApp'=> 'app1',
             'section'   => 'sec1',
-            'modifiedAt' => 100
+            'createdAt' => 1000000000000
         ]);
         $profile->setSession([
             'id'        => 'sid2',
             'collectApp'=> 'app2',
             'section'   => 'sec2',
-            'modifiedAt' => 50
+            'createdAt' => 1000000000001
+        ]);
+
+        $session = $profile->getLastSession();
+        $this->assertEquals('sid2', $session->getId());
+
+        $profile->getSession('sid1')->addEvent([
+            'id' => 'e1',
+            'definitionId' => 'b1',
+            'createdAt' => 1000000000004
+        ]);
+        $profile->getSession('sid2')->addEvent([
+            'id' => 'e2',
+            'definitionId' => 'b2',
+            'createdAt' => 1000000000003
         ]);
 
         $session = $profile->getLastSession();

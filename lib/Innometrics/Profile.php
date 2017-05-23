@@ -267,8 +267,8 @@ class Profile {
                 $session = $sess;
             }
         }
-        
-        return $session;         
+
+        return $session;
     }
 
     /**
@@ -352,7 +352,7 @@ class Profile {
     }
 
     /**
-     * Sort sessions by modifiedAt property
+     * Sort sessions by last event into the sessions
      * @return Profile
      */
     protected function sortSessions () {

@@ -93,8 +93,7 @@ class SessionTest extends PHPUnit_Framework_TestCase {
                     'createdAt' => $now
                 )
             ),
-            'createdAt' => $now,
-            'modifiedAt' => $now
+            'createdAt' => $now
         ));
 
         $this->assertEquals((object) array(
@@ -110,8 +109,7 @@ class SessionTest extends PHPUnit_Framework_TestCase {
                     'createdAt' => $now
                 )
             ),
-            'createdAt' => $now,
-            'modifiedAt' => $now
+            'createdAt' => $now
         ), $session->serialize(), 'serialize test');
     }
 
@@ -131,8 +129,7 @@ class SessionTest extends PHPUnit_Framework_TestCase {
                     'createdAt' => $now
                 )
             ),
-            'createdAt' => $now,
-            'modifiedAt' => $now
+            'createdAt' => $now
         ));
 
         $session->setDataValue('name2', 'value2');
