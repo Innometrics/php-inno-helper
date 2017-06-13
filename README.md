@@ -12,3 +12,6 @@ For more info read [API reference](http://public.innomdc.com/inno-helper/)
 
 ### [0.0.6] - 2017-05-22
 - Added support Scheduler API
+
+### [0.0.7] - 2017-06-13
+- Added delay parameter for the Scheduler API

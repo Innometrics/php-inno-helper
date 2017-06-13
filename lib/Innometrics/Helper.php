@@ -152,19 +152,25 @@ class Helper {
 
     /**
      * Add application task
-     * @param {Object} params
-     *     @example
-     *     {
-     *         "endpoint": "string", // required
-     *         "method": "string", // required
-     *         "headers": {},
-     *         "id": "string",
-     *         "payload": "string",
-     *         "timestamp": 0
-     *     }
+     * @param array
+     *
+     *     [
+     *         "endpoint" => "string", // required
+     *         "method" => "string", // required
+     *         "headers" => [],
+     *         "id" => "string",
+     *         "payload" => "string",
+     *         "timestamp" => 0,
+     *         "delay" => 0
+     *     ]
+     *
      * @return bool
      */
     public function addTask ($params) {
+        if (isset($params['timestamp']) && isset($params['delay'])) {
+            throw new \ErrorException('You should use only one field: timestamp or delay');
+        }
+
         $url = $this->getSchedulerApiUrl();
         $response = $this->request(array(
             'url'  => $url,
@@ -179,11 +185,12 @@ class Helper {
 
     /**
      * Delete application task
-     * @param {Object} params
-     *     @example
-     *     {
-     *         "taskId": "string", // required
-     *     }
+     * @param array
+     *
+     *     [
+     *         "taskId" => "string", // required
+     *     ]
+     *
      * @return bool
      */
     public function deleteTask ($params) {
@@ -360,13 +367,7 @@ class Helper {
                 }
                 break;
 
-            // case 'get':
             default:
-                /* Not used, disabled for code coverage
-                if (!empty($params['qs'])) {
-                    $params['url'] .= '?' . http_build_query($params['qs']);
-                }
-                */
                 break;
         }
 
@@ -374,13 +375,6 @@ class Helper {
             'Content-Type: application/json',
             'Accept: application/json'
         );
-
-        /* Not used, disabled for code coverage
-        if (isset($params['headers']) && !empty($params['headers'])) {
-            $headers = array_merge($headers, $params['headers']);
-            $headers = array_unique($headers);
-        }
-        */
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($curl, CURLOPT_URL, $params['url']);
