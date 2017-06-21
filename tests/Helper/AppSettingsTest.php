@@ -188,7 +188,7 @@ class AppSettingsTest extends Base {
         
         $curlReferenceConfig = array();
         $curlReferenceConfig[CURLOPT_URL] = 'apiUrl/v1/companies/4/buckets/bucketName/apps/appName/custom?app_key=appKey';
-        $curlReferenceConfig[CURLOPT_CUSTOMREQUEST] = 'put';
+        $curlReferenceConfig[CURLOPT_CUSTOMREQUEST] = 'PUT';
         $curlReferenceConfig[CURLOPT_RETURNTRANSFER] = true;
         $curlReferenceConfig[CURLOPT_POSTFIELDS] = json_encode($values);
         $curlReferenceConfig[CURLOPT_HTTPHEADER] = array(
