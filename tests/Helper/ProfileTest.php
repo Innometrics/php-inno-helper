@@ -188,7 +188,7 @@ class ProfileTest extends Base {
         
         $curlReferenceConfig = array();
         $curlReferenceConfig[CURLOPT_URL] = 'apiUrl/v1/companies/4/buckets/bucketName/profiles/' . $profileId . '?app_key=appKey';
-        $curlReferenceConfig[CURLOPT_CUSTOMREQUEST] = 'delete';
+        $curlReferenceConfig[CURLOPT_CUSTOMREQUEST] = 'DELETE';
         $curlReferenceConfig[CURLOPT_RETURNTRANSFER] = true;
         $curlReferenceConfig[CURLOPT_HTTPHEADER] = array(
             "Content-Type: application/json",
@@ -298,7 +298,7 @@ class ProfileTest extends Base {
         
         $curlReferenceConfig = array();
         $curlReferenceConfig[CURLOPT_URL] = 'apiUrl/v1/companies/4/buckets/bucketName/profiles/' . $profileId . '?app_key=appKey';
-        $curlReferenceConfig[CURLOPT_CUSTOMREQUEST] = 'post';
+        $curlReferenceConfig[CURLOPT_CUSTOMREQUEST] = 'POST';
         $curlReferenceConfig[CURLOPT_RETURNTRANSFER] = true;
         $curlReferenceConfig[CURLOPT_POSTFIELDS] = '{"id":"' . $profileId . '","attributes":[],"sessions":[]}';
         $curlReferenceConfig[CURLOPT_HTTPHEADER] = array(
@@ -435,7 +435,7 @@ class ProfileTest extends Base {
         
         $curlReferenceConfig = array();
         $curlReferenceConfig[CURLOPT_URL] = 'apiUrl/v1/companies/4/buckets/bucketName/profiles/' . $profileId1 . '?app_key=appKey';
-        $curlReferenceConfig[CURLOPT_CUSTOMREQUEST] = 'post';
+        $curlReferenceConfig[CURLOPT_CUSTOMREQUEST] = 'POST';
         $curlReferenceConfig[CURLOPT_RETURNTRANSFER] = true;
         $curlReferenceConfig[CURLOPT_POSTFIELDS] = '{"id":"' . $profileId1 . '","mergedProfiles":["' . $profileId2 . '"]}';
         $curlReferenceConfig[CURLOPT_HTTPHEADER] = array(
