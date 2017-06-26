@@ -167,7 +167,14 @@ class Helper {
      * @return bool
      */
     public function addTask ($params) {
-        if (isset($params['timestamp']) && isset($params['delay'])) {
+        $timestampExists = isset($params['timestamp']);
+        $delayExists = isset($params['delay']);
+
+        if (!$timestampExists && !$delayExists) {
+            throw new \ErrorException('Either use timestamp or delay');
+        }
+
+        if ($timestampExists && $delayExists) {
             throw new \ErrorException('You should use only one field: timestamp or delay');
         }
 
@@ -194,6 +201,10 @@ class Helper {
      * @return bool
      */
     public function deleteTask ($params) {
+        if (!isset($params['taskId'])) {
+            throw new \ErrorException('Parameter "taskId" required');
+        }
+
         $url = $this->getSchedulerApiUrl($params);
         $response = $this->request(array(
             'url'  => $url,
