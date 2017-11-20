@@ -18,3 +18,6 @@ For more info read [API reference](http://public.innomdc.com/inno-helper/)
 
 ### [0.0.8] - 2017-06-26
 - Added validation in methods for the Scheduler API
+
+### [0.0.9] - 2017-11-20
+- Added method getting list of tasks
