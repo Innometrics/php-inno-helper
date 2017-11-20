@@ -109,11 +109,18 @@ class Helper {
      * @return string
      */
     protected function getSchedulerApiUrl (array $params = array()) {
+        $optional = '';
+        if (isset($params['taskId'])) {
+            $optional = '/'.$params['taskId'];
+        } elseif (isset($params['getTasksAsString'])) {
+            $optional = '/tasks';
+        }
+
         return sprintf(
             '%s/scheduler/%s%s?token=%s',
             $this->getSchedulerApiHost(),
             $this->getSchedulerId(),
-            isset($params['taskId']) ? '/'.$params['taskId'] : '',
+            $optional,
             $this->getSchedulerToken()
         );
     }
@@ -140,6 +147,24 @@ class Helper {
      */
     public function getTasks () {
         $url = $this->getSchedulerApiUrl();
+        $response = $this->request(array(
+            'url'   => $url
+        ));
+        $this->checkErrors($response, 200);
+
+        $body = $response['body'];
+
+        return $body;
+    }
+
+    /**
+     * Get list of application tasks
+     * @return array
+     */
+    public function getListTasks () {
+        $url = $this->getSchedulerApiUrl(array(
+            'getTasksAsString' => true
+        ));
         $response = $this->request(array(
             'url'   => $url
         ));
