@@ -44,6 +44,12 @@ class Helper {
     protected $apiUrl = null;
 
     /**
+     * Evaluation API url
+     * @var string
+     */
+    protected $evaluationApiUrl = null;
+
+    /**
      * No cache flag
      * @var bool
      */
@@ -73,6 +79,7 @@ class Helper {
         $this->validateConfig($config);
         $this->groupId = $config['groupId'];
         $this->apiUrl = $config['apiUrl'];
+        $this->evaluationApiUrl = $config['evaluationApiUrl'];
         $this->bucketName = $config['bucketName'];
         $this->appName = $config['appName'];
         $this->appKey = $config['appKey'];
@@ -282,6 +289,14 @@ class Helper {
     }
 
     /**
+     * Get evaluation Api url
+     * @return string
+     */
+    public function getEvaluationApiHost () {
+        return $this->evaluationApiUrl;
+    }
+
+    /**
      * Build Url for API request to work with certain Profile
      *
      * <b>Example:</b>
@@ -346,11 +361,15 @@ class Helper {
      * @return string
      */
     public function getSegmentEvaluationUrl ($params = array()) {
+        $typeSegmentEvaluation = $params['typeSegmentEvaluation'];
+        unset($params['typeSegmentEvaluation']);
+
         return sprintf(
-            '%s/v1/companies/%s/buckets/%s/segment-evaluation?app_key=%s&%s',
-            $this->getApiHost(),
+            '%s/v1/companies/%s/buckets/%s/%s?app_key=%s&%s',
+            $this->getEvaluationApiHost(),
             $this->getCompany(),
             $this->getBucket(),
+            $typeSegmentEvaluation,
             $this->getAppKey(),
             http_build_query($params)
         );
@@ -569,9 +588,11 @@ class Helper {
      * @param string $segmentId
      * @return bool
      */
-    public function evaluateProfileBySegmentId (Profile $profile, $segmentId) {
+    public function evaluateProfileBySegmentId (Profile $profile, $segmentIds) {
+        $segmentIds = is_array($segmentIds) ? $segmentIds : array($segmentIds);
         return $this->_evaluateProfileByParams($profile, array(
-            'segment_id' => $segmentId
+            'segment_id' => $segmentIds,
+            'typeSegmentEvaluation' => 'segment-id-evaluation'
         ));
     }
 
@@ -583,7 +604,8 @@ class Helper {
      */
     public function evaluateProfileByIql ($profile, $iql) {
         return $this->_evaluateProfileByParams($profile, array(
-            'iql' => $iql
+            'iql' => $iql,
+            'typeSegmentEvaluation' => 'iql-evaluation'
         ));
     }
 
@@ -792,7 +814,7 @@ class Helper {
      * @return bool
      */
     protected function _evaluateProfileByParams (Profile $profile, $params) {
-        $result = null;
+        $results = null;
         $defParams = array(
             'profile_id' => $profile->getId()
         );
@@ -808,11 +830,14 @@ class Helper {
         $this->checkErrors($response);
 
         $body = $response['body'];
-        if (isset($body['segmentEvaluation']) && isset($body['segmentEvaluation']['result'])) {
-            $result = $body['segmentEvaluation']['result'];
+        if (isset($body['segmentEvaluation']) && isset($body['segmentEvaluation']['results'])) {
+            $results = $body['segmentEvaluation']['results'];
+            if (count($results) === 1) {
+                $results = $results[0];
+            }
         }
 
-        return $result;
+        return $results;
     }
 
     /**
