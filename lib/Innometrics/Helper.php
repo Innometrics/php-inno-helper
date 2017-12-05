@@ -363,6 +363,7 @@ class Helper {
     public function getSegmentEvaluationUrl ($params = array()) {
         $typeSegmentEvaluation = $params['typeSegmentEvaluation'];
         unset($params['typeSegmentEvaluation']);
+        $params = preg_replace('/%5B\d+%5D/i', '$1$2', http_build_query($params));
 
         return sprintf(
             '%s/companies/%s/buckets/%s/%s?app_key=%s&%s',
@@ -371,7 +372,7 @@ class Helper {
             $this->getBucket(),
             $typeSegmentEvaluation,
             $this->getAppKey(),
-            http_build_query($params)
+            $params
         );
     }
 
@@ -586,7 +587,7 @@ class Helper {
      * Evaluate profile by segment's id
      * @param Profile $profile
      * @param string|array $segmentIds
-     * @return bool
+     * @return bool|array
      */
     public function evaluateProfileBySegmentId (Profile $profile, $segmentIds) {
         $segmentIds = is_array($segmentIds) ? $segmentIds : array($segmentIds);
