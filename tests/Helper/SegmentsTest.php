@@ -246,7 +246,7 @@ class SegmentsTest extends Base {
         }
 
         $curlReferenceConfig = array();
-        $curlReferenceConfig[CURLOPT_URL] = 'evaluationApiUrl/v1/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&some=params&are=here&profile_id=' . $profileId;
+        $curlReferenceConfig[CURLOPT_URL] = 'evaluationApiUrl/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&some=params&are=here&profile_id=' . $profileId;
         $curlReferenceConfig[CURLOPT_RETURNTRANSFER] = true;
         $curlReferenceConfig[CURLOPT_HTTPHEADER] = array(
             "Content-Type: application/json",

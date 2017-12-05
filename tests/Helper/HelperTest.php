@@ -147,7 +147,7 @@ class HelperTest extends Base {
             array(
                 'method' => 'getSegmentEvaluationUrl',
                 'arg'    => array('param1' => 'value1', 'typeSegmentEvaluation' => 'segment-id-evaluation'),
-                'res'    => 'evaluationApiUrl/v1/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&param1=value1'
+                'res'    => 'evaluationApiUrl/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&param1=value1'
             ),
         );
 

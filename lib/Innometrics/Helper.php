@@ -365,7 +365,7 @@ class Helper {
         unset($params['typeSegmentEvaluation']);
 
         return sprintf(
-            '%s/v1/companies/%s/buckets/%s/%s?app_key=%s&%s',
+            '%s/companies/%s/buckets/%s/%s?app_key=%s&%s',
             $this->getEvaluationApiHost(),
             $this->getCompany(),
             $this->getBucket(),
@@ -585,7 +585,7 @@ class Helper {
     /**
      * Evaluate profile by segment's id
      * @param Profile $profile
-     * @param string $segmentId
+     * @param string|array $segmentIds
      * @return bool
      */
     public function evaluateProfileBySegmentId (Profile $profile, $segmentIds) {
