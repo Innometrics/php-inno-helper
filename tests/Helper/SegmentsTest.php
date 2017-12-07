@@ -203,7 +203,7 @@ class SegmentsTest extends Base {
             ->expects($this->once())
             ->method('_evaluateProfileByParams')
             ->with($this->equalTo($profile), $this->equalTo(array(
-                'iql' => $segmentIql,
+                'iql' => array($segmentIql),
                 'typeSegmentEvaluation' => 'iql-evaluation'
             )))
             ->will($this->returnValue(true));

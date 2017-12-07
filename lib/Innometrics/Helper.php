@@ -600,12 +600,13 @@ class Helper {
     /**
      * Evaluate profile by IQL expression
      * @param Profile $profile
-     * @param string $iql
+     * @param string|array $iqls
      * @return bool
      */
-    public function evaluateProfileByIql ($profile, $iql) {
+    public function evaluateProfileByIql ($profile, $iqls) {
+        $iqls = is_array($iqls) ? $iqls : array($iqls);
         return $this->_evaluateProfileByParams($profile, array(
-            'iql' => $iql,
+            'iql' => $iqls,
             'typeSegmentEvaluation' => 'iql-evaluation'
         ));
     }
