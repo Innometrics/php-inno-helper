@@ -80,6 +80,7 @@ class HelperTest extends Base {
             'appName' => 'appName',
             'appKey' => 'appKey',
             'apiUrl' => 'apiUrl',
+            'evaluationApiUrl' => 'evaluationApiUrl',
             'groupId' => 4,
             'schedulerApiHost' => 'schedulerApiHost'
         ));
@@ -89,6 +90,7 @@ class HelperTest extends Base {
             'appName' => 'appName',
             'appKey' => 'appKey',
             'apiUrl' => 'apiUrl',
+            'evaluationApiUrl' => 'evaluationApiUrl',
             'groupId' => '42',
             'schedulerApiHost' => 'schedulerApiHost'
         ));
@@ -144,8 +146,8 @@ class HelperTest extends Base {
             ),
             array(
                 'method' => 'getSegmentEvaluationUrl',
-                'arg'    => array('param1' => 'value1'),
-                'res'    => 'apiUrl/v1/companies/4/buckets/bucketName/segment-evaluation?app_key=appKey&param1=value1'
+                'arg'    => array('param1' => 'value1', 'typeSegmentEvaluation' => 'segment-id-evaluation'),
+                'res'    => 'evaluationApiUrl/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&param1=value1'
             ),
         );
 
