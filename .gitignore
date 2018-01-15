@@ -1,3 +1,5 @@
 /docs/phpdoc-cache*
 /vendor
 /cache
+composer.phar
+phpunit.phar

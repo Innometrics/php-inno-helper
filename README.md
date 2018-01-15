@@ -21,3 +21,6 @@ For more info read [API reference](http://public.innomdc.com/inno-helper/)
 
 ### [0.0.9] - 2017-11-20
 - Added method getting list of tasks
+
+### [0.0.10] - 2017-12-5
+- Has add support a new segment evaluation

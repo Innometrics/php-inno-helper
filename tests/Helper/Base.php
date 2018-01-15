@@ -15,6 +15,7 @@ class Base extends \PHPUnit_Framework_TestCase {
         'appName' => 'appName',
         'appKey' => 'appKey',
         'apiUrl' => 'apiUrl',
+        'evaluationApiUrl' => 'evaluationApiUrl',
         'groupId' => 4,
         'schedulerApiHost' => 'schedulerApiHost'
     );
