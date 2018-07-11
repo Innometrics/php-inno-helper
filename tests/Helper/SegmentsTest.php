@@ -15,15 +15,15 @@ class SegmentsTest extends Base {
 
         $curlConfig = array();
 
-        $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $helper);
+        $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $this);
         $curlExecMock->expects($this->once())
             ->will($this->returnValue(''));
 
-        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $helper);
+        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $this);
         $curlGetinfoMock->expects($this->once())
             ->will($this->returnValue(200));
 
-        $curlSetoptMock = new \PHPUnit_Extensions_MockFunction('curl_setopt', $helper);
+        $curlSetoptMock = new \PHPUnit_Extensions_MockFunction('curl_setopt', $this);
         $curlSetoptMock->expects($this->any())
             ->will($this->returnCallback(function($curl, $optName, $optValue) use (&$curlConfig) {
                 $curlConfig[$optName] = $optValue;
@@ -58,14 +58,14 @@ class SegmentsTest extends Base {
         $httpCode = 500;
         $errorMsg = 'Something is wrong there';
 
-        $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $helper);
+        $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $this);
         $curlExecMock->expects($this->once())
             ->will($this->returnValue(json_encode(array(
                 'statusCode' => $httpCode,
                 'message' => $errorMsg
             ))));
 
-        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $helper);
+        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $this);
         $curlGetinfoMock->expects($this->once())
             ->will($this->returnValue($httpCode));
 
@@ -77,7 +77,7 @@ class SegmentsTest extends Base {
 
         $httpCode = 200;
 
-        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $helper);
+        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $this);
         $curlGetinfoMock->expects($this->any())
             ->will($this->returnValue($httpCode));
 
@@ -110,10 +110,10 @@ class SegmentsTest extends Base {
                 'count' => 0
             )
         );
-
+        
+        $curlExecMock = $this->getHelperFunctionMock('curl_exec')->expects($this->exactly(count($bodies)));
         foreach ($bodies as $body) {
-            $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $helper);
-            $curlExecMock->expects($this->once())
+            $curlExecMock
                 ->will($this->returnValue(json_encode($body['body'])));
 
             $segments = $helper->getSegments();
@@ -168,9 +168,7 @@ class SegmentsTest extends Base {
     }
 
     public function testShouldDelegateEvaluationFromProfileByIql () {
-        $config = $this->config;
-
-        $helper = $this->getMock('Innometrics\Helper', array('_evaluateProfileByParams'), array($config));
+        $helper = $this->createPartialMock('Innometrics\Helper', array('_evaluateProfileByParams'));
 
         $profile = $helper->createProfile('profile-id');
 
@@ -184,16 +182,14 @@ class SegmentsTest extends Base {
                 'typeSegmentEvaluation' => 'segment-id-evaluation'
             )))
             ->will($this->returnValue(false));
-
+        
         $res = $helper->evaluateProfileBySegmentId($profile, $segmentId);
 
         $this->assertFalse($res);
     }
 
     public function testShouldDelegateEvaluationFromProfileBySegmentId () {
-        $config = $this->config;
-
-        $helper = $this->getMock('Innometrics\Helper', array('_evaluateProfileByParams'), array($config));
+        $helper = $this->createPartialMock('Innometrics\Helper', array('_evaluateProfileByParams'));
 
         $profile = $helper->createProfile('profile-id');
 
@@ -221,11 +217,11 @@ class SegmentsTest extends Base {
 
         $curlConfig = array();
 
-        $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $helper);
+        $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $this);
         $curlExecMock->expects($this->once())
             ->will($this->returnValue(false));
 
-        $curlSetoptMock = new \PHPUnit_Extensions_MockFunction('curl_setopt', $helper);
+        $curlSetoptMock = new \PHPUnit_Extensions_MockFunction('curl_setopt', $this);
         $curlSetoptMock->expects($this->any())
             ->will($this->returnCallback(function($curl, $optName, $optValue) use (&$curlConfig) {
                 $curlConfig[$optName] = $optValue;
@@ -270,14 +266,14 @@ class SegmentsTest extends Base {
         $profile = $helper->createProfile($profileId);
         $errorMsg = 'Something is wrong there';
 
-        $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $helper);
+        $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $this);
         $curlExecMock->expects($this->once())
             ->will($this->returnValue(json_encode(array(
                 'statusCode' => $httpCode,
                 'message' => $errorMsg
             ))));
 
-        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $helper);
+        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $this);
         $curlGetinfoMock->expects($this->once())
             ->will($this->returnValue($httpCode));
 
@@ -301,7 +297,7 @@ class SegmentsTest extends Base {
         $httpCode = 200;
         $profile = $helper->createProfile();
 
-        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $helper);
+        $curlGetinfoMock = new \PHPUnit_Extensions_MockFunction('curl_getinfo', $this);
         $curlGetinfoMock->expects($this->any())
             ->will($this->returnValue($httpCode));
 
@@ -324,9 +320,9 @@ class SegmentsTest extends Base {
             )
         );
 
+        $curlExecMock = $this->getHelperFunctionMock('curl_exec')->expects($this->exactly(count($bodies)));
         foreach ($bodies as $body) {
-            $curlExecMock = new \PHPUnit_Extensions_MockFunction('curl_exec', $helper);
-            $curlExecMock->expects($this->once())
+            $curlExecMock
                 ->will($this->returnValue(json_encode($body['body'])));
 
             $method = new \ReflectionMethod('Innometrics\Helper', '_evaluateProfileByParams');

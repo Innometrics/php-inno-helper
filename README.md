@@ -24,3 +24,6 @@ For more info read [API reference](http://public.innomdc.com/inno-helper/)
 
 ### [0.0.10] - 2017-12-5
 - Has add support a new segment evaluation
+
+### [0.0.11] - 2018-07-11
+- Test improvements
