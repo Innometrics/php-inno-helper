@@ -188,7 +188,6 @@ class AttributesTest extends Base {
     }
     
     public function testShouldDelegateSetAttributeToSetAttributes () {
-        $profile = $this->createProfile();
         $attribute = array(
             'collectApp' => 'app',
             'section' => 'sec',
@@ -196,7 +195,7 @@ class AttributesTest extends Base {
             'value' => 'hi'
         );
         
-        $profile = $this->getMock('Innometrics\Profile', array('setAttributes'));
+        $profile = $this->createPartialMock('Innometrics\Profile', array('setAttributes'));
         $profile
             ->expects($this->once())
             ->method('setAttributes')

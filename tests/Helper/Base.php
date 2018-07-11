@@ -7,6 +7,8 @@ require_once('vendor/autoload.php');
 use Innometrics\Helper;
 
 class Base extends \PHPUnit_Framework_TestCase {
+    
+    use \phpmock\phpunit\PHPMock;
 
     protected $helper = null;
 
@@ -32,5 +34,9 @@ class Base extends \PHPUnit_Framework_TestCase {
         $helper = new Helper($config ?: $this->config);
         $this->helper = $helper;
         return $helper;
+    }
+    
+    public function getHelperFunctionMock($name) {
+        return $this->getFunctionMock('Innometrics', $name);
     }
 }
