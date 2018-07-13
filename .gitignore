@@ -1,5 +1,6 @@
 /docs/phpdoc-cache*
 /vendor
 /cache
+/coverage
 composer.phar
 phpunit.phar
